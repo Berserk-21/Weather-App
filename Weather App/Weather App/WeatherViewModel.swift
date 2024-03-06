@@ -16,7 +16,7 @@ final class WeatherViewModel {
     
     private let weatherService: OpenWeatherService
     
-    // BehaviosSubject emits an initial value (what is set in the instaciation).
+    // BehaviosSubject emits an initial value (what is set in the instanciation).
     // PublishSubject emits only value after the subscription is made.
 //    var weatherForecast: BehaviorSubject<WeatherForecast?> = BehaviorSubject(value: nil)
     var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()

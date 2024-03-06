@@ -17,7 +17,7 @@ final class HomeView: UIView {
     
     @IBOutlet private weak var cityLabel: UILabel!
     @IBOutlet private weak var temperatureLabel: UILabel!
-    @IBOutlet private weak var cloudCoverLabel: UILabel!
+    @IBOutlet private weak var weatherCodeLabel: UILabel!
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
     
     // MARK: - Life Cycle
@@ -30,9 +30,18 @@ final class HomeView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
         
+        setupUI()
+        
         subscribe()
         
         viewModel.fetchWeatherData()
+    }
+    
+    private func setupUI() {
+        cityLabel.font = UIFont.systemFont(ofSize: 32.0, weight: .medium)
+        temperatureLabel.font = UIFont.systemFont(ofSize: 80.0, weight: .light)
+        weatherCodeLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
+        maxMinTemperatureLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .medium)
     }
     
     // MARK: - Binding Methods
@@ -56,7 +65,7 @@ final class HomeView: UIView {
         
         cityLabel.text = "Montpellier"
         temperatureLabel.text = "\(forecast.current.temperature_2m)"
-        cloudCoverLabel.text = descriptionForWeatherCode(forecast.current.weather_code)
+        weatherCodeLabel.text = descriptionForWeatherCode(forecast.current.weather_code)
         maxMinTemperatureLabel.text = describeExtremeTemperatures(with: forecast)
     }
     
@@ -66,12 +75,16 @@ final class HomeView: UIView {
         
         var string = ""
         
-        if let maxTemp = forecast.hourly.maxTemperature {
-            string += "↑\(maxTemp)" + forecast.hourly_units.temperature_2m
+        if let maxTemp = forecast.hourly.maxTemperature?.rounded(.down) {
+            string += "↑\(maxTemp.rounded())°"
         }
         
-        if let minTemp = forecast.hourly.minTemperature {
-            string += "↓\(minTemp)" + forecast.hourly_units.temperature_2m
+        if let minTemp = forecast.hourly.minTemperature?.rounded(.down) {
+            if !string.isEmpty {
+                string += " "
+            }
+            
+            string += "↓\(minTemp)°"
         }
         
         return string
