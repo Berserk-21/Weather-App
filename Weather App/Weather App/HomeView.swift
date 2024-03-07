@@ -39,10 +39,12 @@ final class HomeView: UIView {
         viewModel.fetchWeatherData()
     }
     
+    // MARK: - Setup Layout
+    
     private func setupLayout() {
         
         cityLabel.font = UIFont.systemFont(ofSize: 32.0, weight: .medium)
-        temperatureLabel.font = UIFont.systemFont(ofSize: 80.0, weight: .light)
+        temperatureLabel.font = UIFont.systemFont(ofSize: 120.0, weight: .thin)
         weatherCodeLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         maxMinTemperatureLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .medium)
         filterView.alpha = 0.2

@@ -16,6 +16,13 @@ final class WeatherViewModel {
     
     private let weatherService: OpenWeatherService
     
+    // BehaviosSubject emits an initial value (what is set in the instanciation).
+    // PublishSubject emits only value after the subscription is made.
+//    var weatherForecast: BehaviorSubject<WeatherForecast?> = BehaviorSubject(value: nil)
+    var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
+    
+    private var disposeBag = DisposeBag()
+    
     let temperatureFormatter = NumberFormatter()
     
     lazy var currentTemperature: Observable<String>? = {
@@ -57,14 +64,6 @@ final class WeatherViewModel {
             }
             .asObservable()
     }()
-    
-    // BehaviosSubject emits an initial value (what is set in the instanciation).
-    // PublishSubject emits only value after the subscription is made.
-//    var weatherForecast: BehaviorSubject<WeatherForecast?> = BehaviorSubject(value: nil)
-    var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
-    
-    private var disposeBag = DisposeBag()
-    
     
     init() {
         weatherService = OpenWeatherService()
