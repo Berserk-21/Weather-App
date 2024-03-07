@@ -69,7 +69,7 @@ final class HomeView: UIView {
         temperatureLabel.text = "\(forecast.current.temperature_2m)°"
         weatherCodeLabel.text = descriptionForWeatherCode(forecast.current.weather_code)
         maxMinTemperatureLabel.text = describeExtremeTemperatures(with: forecast)
-        backgroundImageView.image = getBackgroundImageForWeatherCode(2)
+        backgroundImageView.image = getBackgroundImageForWeatherCode(forecast.current.weather_code)
     }
     
     // MARK: - Helper Methods
