@@ -17,6 +17,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="moon" translatesAutoresizingMaskIntoConstraints="NO" id="N0B-iP-3Oq">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                            <view alpha="0.10000000000000001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O4q-mh-GQj">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QCp-Sy-hJh">
                                 <rect key="frame" x="16" y="123.00000000000001" width="361" height="165.33333333333337"/>
                                 <subviews>
@@ -28,7 +35,6 @@
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lBp-oR-8Im">
                                         <rect key="frame" x="0.0" y="24" width="361" height="12"/>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="12" id="GCz-Xa-6YY"/>
                                         </constraints>
@@ -41,7 +47,6 @@
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="J8O-ru-1nP">
                                         <rect key="frame" x="0.0" y="112.66666666666666" width="361" height="12"/>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="12" id="1dm-cw-o7t"/>
                                         </constraints>
@@ -64,12 +69,22 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="O4q-mh-GQj" firstAttribute="top" secondItem="N0B-iP-3Oq" secondAttribute="top" id="Ejt-6D-KZ2"/>
+                            <constraint firstItem="O4q-mh-GQj" firstAttribute="bottom" secondItem="N0B-iP-3Oq" secondAttribute="bottom" id="Lth-qk-wjC"/>
                             <constraint firstItem="QCp-Sy-hJh" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="64" id="MvV-MZ-kFv"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="QCp-Sy-hJh" secondAttribute="trailing" constant="16" id="YUf-hZ-etH"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="N0B-iP-3Oq" secondAttribute="trailing" id="YiL-Rf-XGT"/>
+                            <constraint firstItem="O4q-mh-GQj" firstAttribute="trailing" secondItem="N0B-iP-3Oq" secondAttribute="trailing" id="eik-nb-gdX"/>
+                            <constraint firstItem="O4q-mh-GQj" firstAttribute="leading" secondItem="N0B-iP-3Oq" secondAttribute="leading" id="j5b-6G-6HF"/>
+                            <constraint firstItem="N0B-iP-3Oq" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="lpf-Zf-fVV"/>
+                            <constraint firstAttribute="bottom" secondItem="N0B-iP-3Oq" secondAttribute="bottom" id="rab-IS-AGr"/>
                             <constraint firstItem="QCp-Sy-hJh" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="ucZ-Na-6oB"/>
+                            <constraint firstItem="N0B-iP-3Oq" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="w0D-rU-7yn"/>
                         </constraints>
                         <connections>
+                            <outlet property="backgroundImageView" destination="N0B-iP-3Oq" id="TH8-AJ-iKN"/>
                             <outlet property="cityLabel" destination="LvS-0T-oGd" id="RMU-i3-tjO"/>
+                            <outlet property="filterView" destination="O4q-mh-GQj" id="fkG-Dj-qPh"/>
                             <outlet property="maxMinTemperatureLabel" destination="e4o-RG-kiC" id="BWR-Mb-ZUc"/>
                             <outlet property="temperatureLabel" destination="QUH-Be-LoF" id="AdL-vJ-4gb"/>
                             <outlet property="weatherCodeLabel" destination="lVH-EC-xVD" id="mLM-eD-7ia"/>
@@ -82,6 +97,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="moon" width="2640" height="3960"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

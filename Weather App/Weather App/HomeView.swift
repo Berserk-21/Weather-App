@@ -19,6 +19,8 @@ final class HomeView: UIView {
     @IBOutlet private weak var temperatureLabel: UILabel!
     @IBOutlet private weak var weatherCodeLabel: UILabel!
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
+    @IBOutlet private weak var backgroundImageView: UIImageView!
+    @IBOutlet private weak var filterView: UIView!
     
     // MARK: - Life Cycle
     
@@ -42,6 +44,7 @@ final class HomeView: UIView {
         temperatureLabel.font = UIFont.systemFont(ofSize: 80.0, weight: .light)
         weatherCodeLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         maxMinTemperatureLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .medium)
+        filterView.alpha = 0.2
     }
     
     // MARK: - Binding Methods
@@ -51,7 +54,6 @@ final class HomeView: UIView {
         viewModel.weatherForecast
             .observe(on: MainScheduler.instance)
             .subscribe { [weak self] forecast in
-                
                 self?.setupCurrentWeather(with: forecast)
             } onError: { error in
                 print(error.localizedDescription)
@@ -64,9 +66,10 @@ final class HomeView: UIView {
     private func setupCurrentWeather(with forecast: WeatherForecastModel) {
         
         cityLabel.text = "Montpellier"
-        temperatureLabel.text = "\(forecast.current.temperature_2m)"
+        temperatureLabel.text = "\(forecast.current.temperature_2m)°"
         weatherCodeLabel.text = descriptionForWeatherCode(forecast.current.weather_code)
         maxMinTemperatureLabel.text = describeExtremeTemperatures(with: forecast)
+        backgroundImageView.image = getBackgroundImageForWeatherCode(2)
     }
     
     // MARK: - Helper Methods
@@ -90,6 +93,26 @@ final class HomeView: UIView {
         return string
     }
     
+    func getBackgroundImageForWeatherCode(_ code: Int) -> UIImage? {
+        
+        switch code {
+        case 0:
+            return UIImage(named: "clear_sky")
+        case 1...3:
+            return UIImage(named: "partly_cloudy")
+        case 4:
+            return UIImage(named: "overcast")
+        case 10, 20...29, 45, 48:
+            return UIImage(named: "mist")
+        case 50...69, 80...99:
+            return UIImage(named: "rainy")
+        case 70...79:
+            return UIImage(named: "snowfall")
+        default:
+            return UIImage(named: "moon")
+        }
+    }
+    
     func descriptionForWeatherCode(_ code: Int) -> String {
         switch code {
         case 0:
@@ -98,20 +121,12 @@ final class HomeView: UIView {
             return "Partly cloudy"
         case 4:
             return "Overcast"
-        case 10:
+        case 10, 20...29, 45, 48:
             return "Mist"
-        case 20...29:
-            return "Fog"
-        case 45, 48:
-            return "Fog depositing rime"
-        case 50...59:
-            return "Drizzle"
-        case 60...69:
+        case 50...69, 80...99:
             return "Rain"
         case 70...79:
             return "Snowfall"
-        case 80...99:
-            return "Showers"
         default:
             return "Unknown weather condition"
         }
