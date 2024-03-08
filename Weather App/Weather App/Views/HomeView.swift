@@ -122,7 +122,7 @@ final class HomeView: UIView {
     
     private func showError() {
         
-        // TODO: - Add a enum and a switch to present different errors.
+        // TODO: - Add an enum and a switch to present different errors.
         
         presentAlert(title: Constants.Views.HomeView.networkErrorTitle, message: Constants.Views.HomeView.networkErrorMessage)
         hideErrorLayout(false)
