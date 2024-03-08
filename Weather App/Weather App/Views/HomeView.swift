@@ -12,7 +12,7 @@ final class HomeView: UIView {
     
     // MARK: - Properties
     
-    private let viewModel: WeatherViewModel
+    let viewModel: WeatherViewModel
     private let disposeBag = DisposeBag()
     
     @IBOutlet private weak var cityLabel: UILabel!

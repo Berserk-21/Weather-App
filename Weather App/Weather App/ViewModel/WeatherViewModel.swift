@@ -68,10 +68,26 @@ final class WeatherViewModel {
             .asObservable()
     }()
     
+    let localizeUserAction = PublishSubject<Void>()
+    
     init() {
         weatherService = OpenWeatherService()
         
         fetchWeatherData()
+        bindActions()
+    }
+    
+    func bindActions() {
+        
+        localizeUserAction.subscribe(onNext: { [weak self] in
+            self?.fetchGeolocalization()
+        })
+        .disposed(by: disposeBag)
+    }
+    
+    func fetchGeolocalization() {
+        
+        print("fetchGeolocalization")
     }
     
     // Fetch weather forecast in a property, the views must observe it to get forecast events.
