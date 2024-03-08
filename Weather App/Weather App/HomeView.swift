@@ -17,6 +17,7 @@ final class HomeView: UIView {
     
     @IBOutlet private weak var cityLabel: UILabel!
     @IBOutlet private weak var temperatureLabel: UILabel!
+    @IBOutlet private weak var temperatureDegreeLabel: UILabel!
     @IBOutlet private weak var weatherCodeLabel: UILabel!
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
     @IBOutlet private weak var backgroundImageView: UIImageView!
@@ -46,6 +47,7 @@ final class HomeView: UIView {
         
         cityLabel.font = UIFont.systemFont(ofSize: 32.0, weight: .medium)
         temperatureLabel.font = UIFont.systemFont(ofSize: 120.0, weight: .thin)
+        temperatureDegreeLabel.font = temperatureLabel.font
         weatherCodeLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         maxMinTemperatureLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .medium)
         filterView.alpha = 0.2

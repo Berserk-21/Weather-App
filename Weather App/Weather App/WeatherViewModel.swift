@@ -135,11 +135,7 @@ final class WeatherViewModel {
         temperatureFormatter.roundingMode = .halfDown
         temperatureFormatter.maximumFractionDigits = 0
         
-        guard var temperatureString = temperatureFormatter.string(from: NSNumber(floatLiteral: temperature)) else { return nil }
-        
-        temperatureString += "°"
-        
-        return temperatureString
+        return temperatureFormatter.string(from: NSNumber(floatLiteral: temperature))
     }
     
     private func formatExtremeTemperatures(from forecast: WeatherForecastModel) -> String {
