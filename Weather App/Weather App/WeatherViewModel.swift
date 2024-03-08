@@ -25,6 +25,9 @@ final class WeatherViewModel {
     
     let temperatureFormatter = NumberFormatter()
     
+    let isLoading = BehaviorSubject<Bool>(value: false)
+    let error = PublishSubject<Error>()
+    
     lazy var currentTemperature: Observable<String>? = {
         return weatherForecast
             .compactMap { [weak self] in
@@ -74,13 +77,17 @@ final class WeatherViewModel {
     // Fetch weather forecast in a property, the views must observe it to get forecast events.
     func fetchWeatherData() {
         
+        isLoading.onNext(true)
+        
         weatherService.fetchWeatherForecast()
             .subscribe { [weak self] forecast in
                 self?.weatherForecast.onNext(forecast)
-            } onError: { error in
-                print("error: \(error)")
-            } onCompleted: {
-                print("did fetch weather data")
+                self?.isLoading.onNext(false)
+            } onError: { [weak self] error in
+                self?.isLoading.onNext(false)
+                self?.error.onNext(error)
+            } onCompleted: { [weak self] in
+                self?.isLoading.onNext(false)
             }
             .disposed(by: disposeBag)
     }

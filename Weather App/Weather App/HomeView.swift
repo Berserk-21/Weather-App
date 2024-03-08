@@ -21,6 +21,10 @@ final class HomeView: UIView {
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
     @IBOutlet private weak var backgroundImageView: UIImageView!
     @IBOutlet private weak var filterView: UIView!
+    @IBOutlet private weak var retryButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
+    
+    var alertTexts: PublishSubject<(String, String)> = PublishSubject()
     
     // MARK: - Life Cycle
     
@@ -33,10 +37,7 @@ final class HomeView: UIView {
         super.awakeFromNib()
         
         setupLayout()
-        
         setupBindings()
-        
-        viewModel.fetchWeatherData()
     }
     
     // MARK: - Setup Layout
@@ -48,6 +49,8 @@ final class HomeView: UIView {
         weatherCodeLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         maxMinTemperatureLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .medium)
         filterView.alpha = 0.2
+        retryButton.setTitle(Constants.Views.HomeView.retryButtonTitle, for: .normal)
+        retryButton.isHidden = true
     }
     
     // MARK: - Binding Methods
@@ -56,28 +59,89 @@ final class HomeView: UIView {
         
         viewModel.currentTemperature?
             .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
             .bind(to: temperatureLabel.rx.text)
             .disposed(by: disposeBag)
         
         viewModel.minMaxTemperature?
             .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
             .bind(to: maxMinTemperatureLabel.rx.text)
             .disposed(by: disposeBag)
         
         viewModel.weatherCodeString?
             .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
             .bind(to: weatherCodeLabel.rx.text)
             .disposed(by: disposeBag)
         
         viewModel.backgroundImage?
             .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
             .bind(to: backgroundImageView.rx.image)
             .disposed(by: disposeBag)
         
         viewModel.cityString?
             .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
             .bind(to: cityLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        viewModel.error
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                self?.showError()
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.isLoading
+            .observe(on: MainScheduler.instance)
+            .bind(to: activityIndicator.rx.isAnimating)
+            .disposed(by: disposeBag)
+        
+        viewModel.isLoading
+            .observe(on: MainScheduler.instance)
+            .subscribe { [weak self] isLoading in
+                if isLoading {
+                    self?.hideErrorLayout(true)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        viewModel.weatherForecast
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                self?.hideErrorLayout(true)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: - Coordination Methods
+    
+    private func showError() {
+        
+        // TODO: - Add a enum and a switch to present different errors.
+        
+        presentAlert(title: Constants.Views.HomeView.networkErrorTitle, message: Constants.Views.HomeView.networkErrorMessage)
+        hideErrorLayout(false)
+    }
+    
+    private func hideErrorLayout(_ hide:Bool) {
+        
+        retryButton.isHidden = hide
+    }
+    
+    private func presentAlert(title: String, message: String) {
+        
+        alertTexts
+            .onNext((title, message))
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func didTapRetryButton(_ sender: Any) {
+        
+        viewModel.fetchWeatherData()
     }
     
 }
