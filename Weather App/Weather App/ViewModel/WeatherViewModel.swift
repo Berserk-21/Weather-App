@@ -143,7 +143,7 @@ final class WeatherViewModel {
         var string = ""
         
         if let maxTemp = forecast.hourly.maxTemperature, let maxTempString = formatTemperature(maxTemp) {
-            string += "↑\(maxTempString)"
+            string += "↑\(maxTempString)°"
         }
         
         if let minTemp = forecast.hourly.minTemperature, let minTempString = formatTemperature(minTemp) {
@@ -151,7 +151,7 @@ final class WeatherViewModel {
                 string += " "
             }
             
-            string += "↓\(minTempString)"
+            string += "↓\(minTempString)°"
         }
         
         return string
