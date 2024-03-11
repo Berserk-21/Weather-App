@@ -11,12 +11,10 @@ import RxSwift
 final class OpenWeatherService {
     
     /// Use this method to fetch weather data from Open Weather API.
-    func fetchWeatherForecast() -> Observable<WeatherForecastModel> {
+    func fetchWeatherForecast(with urlString: String) -> Observable<WeatherForecastModel> {
     
-        // Get the current and hourly weather of the day.
-        let currentWeatherUrlString = "https://api.open-meteo.com/v1/forecast?latitude=43.6109&longitude=3.8763&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
         
-        guard let url = URL(string: currentWeatherUrlString) else { return Observable.error(NSError(domain: "", code: -1))}
+        guard let url = URL(string: urlString) else { return Observable.error(NSError(domain: "", code: -1))}
         
         return Observable.create { observer in
             let task = URLSession.shared.dataTask(with: url) { data, response, error in

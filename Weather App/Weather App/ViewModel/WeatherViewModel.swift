@@ -83,14 +83,13 @@ final class WeatherViewModel {
     func bindActions() {
         
         localizeUserAction.subscribe(onNext: { [weak self] in
-            self?.locationManager.requestWhenInUseAuthorization()
-            self?.observeAuthorizationStatus()
+            self?.fetchUserLocation()
         })
         .disposed(by: disposeBag)
         
         locationManager.rx.didUpdateLocations
-            .subscribe { locations in
-                print(locations)
+            .subscribe { [weak self] event in
+                self?.fetchWeatherData(for: event.element?.locations.first)
             }
             .disposed(by: disposeBag)
         
@@ -101,12 +100,14 @@ final class WeatherViewModel {
             .disposed(by: disposeBag)
     }
     
-    // Fetch weather forecast in a property, the views must observe it to get forecast events.
-    func fetchWeatherData() {
-        
+    // Fetch the weather forecasts in a property, the views must observe it to get forecast events.
+    func fetchWeatherData(for location: CLLocation? = nil) {
+
         isLoading.onNext(true)
         
-        weatherService.fetchWeatherForecast()
+        let urlString = getUrlString(from: location)
+        
+        weatherService.fetchWeatherForecast(with: urlString)
             .subscribe { [weak self] forecast in
                 self?.weatherForecast.onNext(forecast)
                 self?.isLoading.onNext(false)
@@ -117,6 +118,25 @@ final class WeatherViewModel {
                 self?.isLoading.onNext(false)
             }
             .disposed(by: disposeBag)
+    }
+    
+    // MARK: - CoreLocation Methods
+    
+    private func fetchUserLocation() {
+        
+        observeAuthorizationStatus()
+                
+        switch locationManager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .denied:
+            // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
+            print("Location authorization status denied")
+        case .restricted:
+            print("Location authorization status restricted")
+        }
     }
     
     // Use this method to observe the user location authorization status.
@@ -130,15 +150,32 @@ final class WeatherViewModel {
                 case .notDetermined:
                     break
                 case .denied:
-                    break
+                    // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
+                    print("Location authorization status denied")
                 case .restricted:
-                    break
+                    print("Location authorization status restricted")
                 @unknown default:
                     print("Unknown location authorization status")
                 }
             })
             .disposed(by: disposeBag)
     }
+    
+    // MARK: - Helper Methods
+    
+    private func getUrlString(from location: CLLocation?) -> String {
+        
+        let coordinateString: String
+        
+        if let latitude = location?.coordinate.latitude, let longitude = location?.coordinate.longitude {
+            coordinateString = "https://api.open-meteo.com/v1/forecast?latitude=\(latitude)&longitude=\(longitude)&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
+        } else {
+            coordinateString = "https://api.open-meteo.com/v1/forecast?latitude=43.6109&longitude=3.8763&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
+        }
+        
+        return coordinateString
+    }
+    
     
     private func descriptionForWeatherCode(_ code: Int) -> String {
         switch code {
