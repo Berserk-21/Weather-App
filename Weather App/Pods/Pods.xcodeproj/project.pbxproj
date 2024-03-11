@@ -420,7 +420,7 @@
 		1F0D4A54F7007F3B35230D4569794718 /* CombineLatest+Collection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "CombineLatest+Collection.swift"; path = "RxSwift/Observables/CombineLatest+Collection.swift"; sourceTree = "<group>"; };
 		1F98FBF484577CA734E8613F326F3114 /* RxCocoa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = RxCocoa.h; path = RxCocoa/RxCocoa.h; sourceTree = "<group>"; };
 		1FF91BB0F642C6D1E38AADACE7D9265F /* Disposable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Disposable.swift; path = RxSwift/Disposable.swift; sourceTree = "<group>"; };
-		208A121C85CA4FF50CD04DEA0D44C122 /* Pods-Weather App */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "Pods-Weather App"; path = "libPods-Weather App.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		208A121C85CA4FF50CD04DEA0D44C122 /* libPods-Weather App.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Weather App.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		209E27EA8D4267483093A4E2B9E7A7E2 /* SchedulerServices+Emulation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "SchedulerServices+Emulation.swift"; path = "RxSwift/Schedulers/SchedulerServices+Emulation.swift"; sourceTree = "<group>"; };
 		21E569B1B848FA74115C09F0F71AD27C /* Generate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Generate.swift; path = RxSwift/Observables/Generate.swift; sourceTree = "<group>"; };
 		222463A331ED6A049AEDB812FDE18C30 /* SingleAsync.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SingleAsync.swift; path = RxSwift/Observables/SingleAsync.swift; sourceTree = "<group>"; };
@@ -1076,7 +1076,7 @@
 		9B3F6E9845997956C34CB8909E2934CB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				208A121C85CA4FF50CD04DEA0D44C122 /* Pods-Weather App */,
+				208A121C85CA4FF50CD04DEA0D44C122 /* libPods-Weather App.a */,
 				BC432FD48A5932251F1CAFBC4BF74894 /* libRxCocoa.a */,
 				05FE0373EB002178D91EC3DE46E35518 /* libRxCoreLocation.a */,
 				FF8B264DFE802855D5D67E7CDDABFC3C /* libRxRelay.a */,
@@ -1311,7 +1311,7 @@
 			);
 			name = "Pods-Weather App";
 			productName = "Pods-Weather App";
-			productReference = 208A121C85CA4FF50CD04DEA0D44C122 /* Pods-Weather App */;
+			productReference = 208A121C85CA4FF50CD04DEA0D44C122 /* libPods-Weather App.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		EA9EA43B3B503823EE36C60D9C8A865F /* RxSwift */ = {
