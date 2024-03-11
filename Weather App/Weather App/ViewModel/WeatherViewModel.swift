@@ -9,12 +9,15 @@ import Foundation
 import RxSwift
 import RxCocoa
 import RxRelay
+import CoreLocation
+import RxCoreLocation
 
 final class WeatherViewModel {
     
     // MARK: - Properties
     
     private let weatherService: OpenWeatherService
+    private let locationManager = CLLocationManager()
     
     // BehaviosSubject emits an initial value (what is set in the instanciation).
     // PublishSubject emits only value after the subscription is made.
@@ -80,14 +83,22 @@ final class WeatherViewModel {
     func bindActions() {
         
         localizeUserAction.subscribe(onNext: { [weak self] in
-            self?.fetchGeolocalization()
+            self?.locationManager.requestWhenInUseAuthorization()
+            self?.observeAuthorizationStatus()
         })
         .disposed(by: disposeBag)
-    }
-    
-    func fetchGeolocalization() {
         
-        print("fetchGeolocalization")
+        locationManager.rx.didUpdateLocations
+            .subscribe { locations in
+                print(locations)
+            }
+            .disposed(by: disposeBag)
+        
+        locationManager.rx.didError
+            .subscribe(onNext: { event in
+                print("There was an error fetching user location: ",event.error)
+            })
+            .disposed(by: disposeBag)
     }
     
     // Fetch weather forecast in a property, the views must observe it to get forecast events.
@@ -105,6 +116,27 @@ final class WeatherViewModel {
             } onCompleted: { [weak self] in
                 self?.isLoading.onNext(false)
             }
+            .disposed(by: disposeBag)
+    }
+    
+    // Use this method to observe the user location authorization status.
+    private func observeAuthorizationStatus() {
+        
+        locationManager.rx.didChangeAuthorization
+            .subscribe(onNext: { event in
+                switch event.status {
+                case .authorizedAlways, .authorizedWhenInUse:
+                    self.locationManager.requestLocation()
+                case .notDetermined:
+                    break
+                case .denied:
+                    break
+                case .restricted:
+                    break
+                @unknown default:
+                    print("Unknown location authorization status")
+                }
+            })
             .disposed(by: disposeBag)
     }
     
