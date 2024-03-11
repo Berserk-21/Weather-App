@@ -2,25 +2,33 @@ PODS:
   - RxCocoa (6.6.0):
     - RxRelay (= 6.6.0)
     - RxSwift (= 6.6.0)
+  - RxCoreLocation (1.5.1):
+    - RxCoreLocation/Core (= 1.5.1)
+  - RxCoreLocation/Core (1.5.1):
+    - RxCocoa (~> 6.0)
+    - RxSwift (~> 6.0)
   - RxRelay (6.6.0):
     - RxSwift (= 6.6.0)
   - RxSwift (6.6.0)
 
 DEPENDENCIES:
   - RxCocoa (= 6.6.0)
+  - RxCoreLocation (~> 1.5.1)
   - RxSwift (= 6.6.0)
 
 SPEC REPOS:
   trunk:
     - RxCocoa
+    - RxCoreLocation
     - RxRelay
     - RxSwift
 
 SPEC CHECKSUMS:
   RxCocoa: 44a80de90e25b739b5aeaae3c8c371a32e3343cc
+  RxCoreLocation: a78f4cbf32a4c6c47ecccbe22d41ff93b7e8c099
   RxRelay: 45eaa5db8ee4fb50e5ebd57deec0159e97fa51e6
   RxSwift: a4b44f7d24599f674deebd1818eab82e58410632
 
-PODFILE CHECKSUM: 4e2dc2f795c669f1cf852df801fa057ce7d29b37
+PODFILE CHECKSUM: bd2fbcdda2395b1080369c3e8d31065e54b99c1b
 
 COCOAPODS: 1.15.2
