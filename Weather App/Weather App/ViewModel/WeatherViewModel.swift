@@ -180,7 +180,7 @@ final class WeatherViewModel {
     }
     
     private func formatTemperature(_ temperature: CGFloat) -> String? {
-        temperatureFormatter.roundingMode = .halfDown
+        temperatureFormatter.roundingMode = .down
         temperatureFormatter.maximumFractionDigits = 0
         
         return temperatureFormatter.string(from: NSNumber(floatLiteral: temperature))
