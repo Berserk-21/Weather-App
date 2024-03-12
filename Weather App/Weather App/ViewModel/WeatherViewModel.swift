@@ -18,56 +18,58 @@ final class WeatherViewModel {
     
     private let weatherService: OpenWeatherService
     private let locationManager = CLLocationManager()
-    
-    // BehaviosSubject emits an initial value (what is set in the instanciation).
-    // PublishSubject emits only value after the subscription is made.
-//    var weatherForecast: BehaviorSubject<WeatherForecast?> = BehaviorSubject(value: nil)
-    var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
-    
+    private let temperatureFormatter = NumberFormatter()
+
     private var disposeBag = DisposeBag()
     
-    let temperatureFormatter = NumberFormatter()
+    private var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
+    private var currentCity: PublishSubject<String> = PublishSubject()
+    
+    private lazy var observableWeatherData: Observable<(WeatherForecastModel, String)> = {
+        return Observable.zip(weatherForecast, currentCity)
+            .map { $0 }
+            .share()
+            .asObservable()
+    }()
     
     let isLoading = BehaviorSubject<Bool>(value: false)
     let error = PublishSubject<Error>()
     
     lazy var currentTemperature: Observable<String>? = {
-        return weatherForecast
+        return observableWeatherData
             .compactMap { [weak self] in
-                self?.formatTemperature($0.current.temperature_2m)
+                return self?.formatTemperature($0.0.current.temperature_2m)
             }
             .asObservable()
     }()
     
     lazy var minMaxTemperature: Observable<String>? = {
-        return weatherForecast
+        return observableWeatherData
             .compactMap { [weak self] in
-                self?.formatExtremeTemperatures(from: $0)
+                self?.formatExtremeTemperatures(from: $0.0)
             }
             .asObservable()
     }()
     
     lazy var weatherCodeString: Observable<String>? = {
-        return weatherForecast
+        return observableWeatherData
             .compactMap { [weak self] in
-                self?.descriptionForWeatherCode($0.current.weather_code)
+                self?.descriptionForWeatherCode($0.0.current.weather_code)
             }
             .asObservable()
     }()
     
     lazy var backgroundImage: Observable<UIImage>? = {
-        return weatherForecast
+        return observableWeatherData
             .compactMap { [weak self] in
-                self?.getBackgroundImageForWeatherCode($0.current.weather_code)
+                self?.getBackgroundImageForWeatherCode($0.0.current.weather_code)
             }
             .asObservable()
     }()
     
     lazy var cityString: Observable<String>? = {
-        return weatherForecast
-            .compactMap { _ in
-                return "Montpellier"
-            }
+        return observableWeatherData
+            .compactMap { $0.1 }
             .asObservable()
     }()
     
@@ -76,19 +78,28 @@ final class WeatherViewModel {
     init() {
         weatherService = OpenWeatherService()
         
-        fetchWeatherData()
         bindActions()
+        setupLocationManager()
+        fetchUserLocation()
+    }
+    
+    private func setupLocationManager() {
+        locationManager.allowsBackgroundLocationUpdates = false
+        locationManager.distanceFilter = 1000
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
     
     func bindActions() {
         
         localizeUserAction.subscribe(onNext: { [weak self] in
-            self?.fetchUserLocation()
+            self?.locationManager.requestLocation()
         })
         .disposed(by: disposeBag)
         
         locationManager.rx.didUpdateLocations
+            .throttle(.seconds(10), scheduler: MainScheduler.instance)
             .subscribe { [weak self] event in
+                self?.locationManager.stopUpdatingLocation()
                 self?.fetchWeatherData(for: event.element?.locations.first)
             }
             .disposed(by: disposeBag)
@@ -102,10 +113,17 @@ final class WeatherViewModel {
     
     // Fetch the weather forecasts in a property, the views must observe it to get forecast events.
     func fetchWeatherData(for location: CLLocation? = nil) {
+        
+        guard let unwrappedLocation = location else {
+            print("Unable to fetch weather data, location is missing")
+            return
+        }
 
         isLoading.onNext(true)
         
-        let urlString = getUrlString(from: location)
+        reverseGeocodeCity(for: unwrappedLocation)
+        
+        let urlString = getUrlString(from: unwrappedLocation)
         
         weatherService.fetchWeatherForecast(with: urlString)
             .subscribe { [weak self] forecast in
@@ -122,33 +140,16 @@ final class WeatherViewModel {
     
     // MARK: - CoreLocation Methods
     
+    // Use this method to observe the user location authorization status.
     private func fetchUserLocation() {
         
-        observeAuthorizationStatus()
-                
-        switch locationManager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            locationManager.requestLocation()
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .denied:
-            // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
-            print("Location authorization status denied")
-        case .restricted:
-            print("Location authorization status restricted")
-        }
-    }
-    
-    // Use this method to observe the user location authorization status.
-    private func observeAuthorizationStatus() {
-        
         locationManager.rx.didChangeAuthorization
-            .subscribe(onNext: { event in
+            .subscribe(onNext: { [weak self] event in
                 switch event.status {
                 case .authorizedAlways, .authorizedWhenInUse:
-                    self.locationManager.requestLocation()
+                    self?.locationManager.requestLocation()
                 case .notDetermined:
-                    break
+                    self?.locationManager.requestWhenInUseAuthorization()
                 case .denied:
                     // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
                     print("Location authorization status denied")
@@ -161,21 +162,28 @@ final class WeatherViewModel {
             .disposed(by: disposeBag)
     }
     
+    private func reverseGeocodeCity(for location: CLLocation) {
+        
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let placemark = placemarks?.first, let city = placemark.locality {
+                self.currentCity
+                    .onNext(city)
+            }
+        }
+    }
+    
     // MARK: - Helper Methods
     
-    private func getUrlString(from location: CLLocation?) -> String {
+    private func getUrlString(from location: CLLocation) -> String {
         
-        let coordinateString: String
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
         
-        if let latitude = location?.coordinate.latitude, let longitude = location?.coordinate.longitude {
-            coordinateString = "https://api.open-meteo.com/v1/forecast?latitude=\(latitude)&longitude=\(longitude)&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
-        } else {
-            coordinateString = "https://api.open-meteo.com/v1/forecast?latitude=43.6109&longitude=3.8763&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
-        }
+        let coordinateString: String = "https://api.open-meteo.com/v1/forecast?latitude=\(latitude)&longitude=\(longitude)&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
         
         return coordinateString
     }
-    
     
     private func descriptionForWeatherCode(_ code: Int) -> String {
         switch code {

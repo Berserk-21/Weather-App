@@ -109,13 +109,6 @@ final class HomeView: UIView {
                 }
             }
             .disposed(by: disposeBag)
-        
-        viewModel.weatherForecast
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] _ in
-                self?.hideErrorLayout(true)
-            })
-            .disposed(by: disposeBag)
     }
     
     // MARK: - Coordination Methods

@@ -13,7 +13,6 @@ final class OpenWeatherService {
     /// Use this method to fetch weather data from Open Weather API.
     func fetchWeatherForecast(with urlString: String) -> Observable<WeatherForecastModel> {
     
-        
         guard let url = URL(string: urlString) else { return Observable.error(NSError(domain: "", code: -1))}
         
         return Observable.create { observer in
