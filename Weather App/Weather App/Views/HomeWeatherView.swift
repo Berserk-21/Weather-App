@@ -109,6 +109,13 @@ final class HomeWeatherView: UIView {
                 }
             }
             .disposed(by: disposeBag)
+        
+        viewModel.geolocationRestricted
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] message in
+                self?.presentAlert(title: "Geolocation not available", message: message)
+            })
+            .disposed(by: disposeBag)
     }
     
     // MARK: - Coordination Methods

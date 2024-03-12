@@ -15,4 +15,14 @@ enum Constants {
             static let networkErrorMessage = "Please check your internet connection and retry !"
         }
     }
+    
+    enum Geolocation {
+        enum Error {
+            static let locationUnknown = "location is currently unknown"
+            static let denied = "Please check your privacy settings:\nSettings -> Privacy -> Locations Services -> Weather App"
+            static let network = "Geolocation network error"
+            static let defaultMessage = "Unable to get a location, please check your privacy settings"
+            static let restricted = "Location authorization status restricted"
+        }
+    }
 }

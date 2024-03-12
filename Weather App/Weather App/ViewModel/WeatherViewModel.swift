@@ -34,6 +34,7 @@ final class WeatherViewModel {
     
     let isLoading = BehaviorSubject<Bool>(value: false)
     let error = PublishSubject<Error>()
+    let geolocationRestricted = PublishSubject<String>()
     
     lazy var currentTemperature: Observable<String>? = {
         return observableWeatherData
@@ -105,8 +106,10 @@ final class WeatherViewModel {
             .disposed(by: disposeBag)
         
         locationManager.rx.didError
-            .subscribe(onNext: { event in
-                print("There was an error fetching user location: ",event.error)
+            .subscribe(onNext: { [weak self] event in
+                if let clError = event.error as? CLError {
+                    self?.coreLocationDidFailWith(clError)
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -115,8 +118,7 @@ final class WeatherViewModel {
     func fetchWeatherData(for location: CLLocation? = nil) {
         
         guard let unwrappedLocation = location else {
-            print("Unable to fetch weather data, location is missing")
-            return
+            fatalError("Unable to fetch weather data, location is missing")
         }
 
         isLoading.onNext(true)
@@ -152,9 +154,9 @@ final class WeatherViewModel {
                     self?.locationManager.requestWhenInUseAuthorization()
                 case .denied:
                     // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
-                    print("Location authorization status denied")
+                    self?.geolocationRestricted.onNext(Constants.Geolocation.Error.denied)
                 case .restricted:
-                    print("Location authorization status restricted")
+                    self?.geolocationRestricted.onNext(Constants.Geolocation.Error.restricted)
                 @unknown default:
                     print("Unknown location authorization status")
                 }
@@ -174,6 +176,25 @@ final class WeatherViewModel {
     }
     
     // MARK: - Helper Methods
+    
+    private func coreLocationDidFailWith(_ error: CLError) {
+        
+        let errorMessage: String
+        
+        switch error.code {
+        case .locationUnknown:
+            errorMessage = Constants.Geolocation.Error.locationUnknown
+        case .denied:
+            errorMessage = Constants.Geolocation.Error.denied
+        case .network:
+            errorMessage = Constants.Geolocation.Error.network
+        default:
+            errorMessage = Constants.Geolocation.Error.defaultMessage
+        }
+        
+        geolocationRestricted
+            .onNext(errorMessage)
+    }
     
     private func getUrlString(from location: CLLocation) -> String {
         

@@ -10,7 +10,7 @@ import RxSwift
 import RxCocoa
 import RxRelay
 
-class WeatherViewController: UIViewController {
+final class WeatherViewController: UIViewController {
 
     private var disposeBag = DisposeBag()
     private var viewModel: WeatherViewModel!
