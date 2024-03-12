@@ -8,6 +8,13 @@
 import Foundation
 import RxSwift
 
+enum OpenWeatherServiceError: Error {
+    case transportError(Error)
+    case responseUnavailable
+    case dataUnavailable
+    case serverSideError(Int)
+}
+
 final class OpenWeatherService {
     
     /// Use this method to fetch weather data from Open Weather API.
@@ -18,18 +25,26 @@ final class OpenWeatherService {
         return Observable.create { observer in
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let error = error {
-                    observer.onError(error)
+                    observer.onError(OpenWeatherServiceError.transportError(error))
                     return
                 }
                 
-                guard let unwrappedData = data else {
-                    return observer.onError(NSError(domain: "no data", code: -2))
+                guard let unwrappedResponse = response as? HTTPURLResponse else {
+                    return observer.onError(OpenWeatherServiceError.responseUnavailable)
                 }
                 
-                // Uncomment for reading json received in a string format.
+                guard let unwrappedData = data else {
+                    return observer.onError(OpenWeatherServiceError.dataUnavailable)
+                }
+                
+                // Uncomment to read the json received in a string format.
 //                if let string = String(data: unwrappedData, encoding: .utf8) {
 //                    print("string: ",string)
 //                }
+                
+                guard (200...299).contains(unwrappedResponse.statusCode) else {
+                    return observer.onError(OpenWeatherServiceError.serverSideError(unwrappedResponse.statusCode))
+                }
                 
                 do {
                     let forecast = try JSONDecoder().decode(WeatherForecastModel.self, from: unwrappedData)

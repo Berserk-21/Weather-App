@@ -115,13 +115,6 @@ final class HomeWeatherView: UIView {
                 self?.updateFetchingStateLayout(for: state)
             })
             .disposed(by: disposeBag)
-        
-        viewModel.geolocationRestricted
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] message in
-                self?.presentAlert(title: "Geolocation not available", message: message)
-            })
-            .disposed(by: disposeBag)
     }
     
     // MARK: - Coordination Methods
@@ -135,13 +128,13 @@ final class HomeWeatherView: UIView {
             retryButton.isHidden = true
             loadingLabel.isHidden = false
             contentView.isHidden = true
-        case .error:
+        case .error(let title, let message):
             activityIndicator.stopAnimating()
             filterView.alpha = 0.8
             retryButton.isHidden = false
             loadingLabel.isHidden = true
             contentView.isHidden = true
-            presentAlert(title: Constants.Views.HomeView.networkErrorTitle, message: Constants.Views.HomeView.networkErrorMessage)
+            presentAlert(title: title, message: message)
         case .completed:
             activityIndicator.stopAnimating()
             filterView.alpha = 0.2
@@ -149,20 +142,6 @@ final class HomeWeatherView: UIView {
             loadingLabel.isHidden = true
             contentView.isHidden = false
         }
-    }
-    
-    private func showError() {
-        
-        // TODO: - Add an enum and a switch to present different errors.
-        
-        presentAlert(title: Constants.Views.HomeView.networkErrorTitle, message: Constants.Views.HomeView.networkErrorMessage)
-        hideErrorLayout(false)
-    }
-    
-    private func hideErrorLayout(_ hide:Bool) {
-        
-        retryButton.isHidden = hide
-        filterView.alpha = hide ? 0.2 : 0.8
     }
     
     private func presentAlert(title: String, message: String) {
@@ -175,7 +154,7 @@ final class HomeWeatherView: UIView {
     
     @IBAction func didTapRetryButton(_ sender: Any) {
         
-        viewModel.fetchWeatherData()
+        viewModel.didTapRetryButton()
     }
     
 }

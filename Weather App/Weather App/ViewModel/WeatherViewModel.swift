@@ -14,7 +14,7 @@ import RxCoreLocation
 
 enum FetchingState {
     case loading
-    case error(_: String)
+    case error(title: String, message: String)
     case completed
 }
 
@@ -41,7 +41,6 @@ final class WeatherViewModel {
             .asObservable()
     }()
     
-    let geolocationRestricted = PublishSubject<String>()
     let fetchingState = PublishSubject<FetchingState>()
     
     lazy var currentTemperature: Observable<String>? = {
@@ -109,35 +108,37 @@ final class WeatherViewModel {
             .throttle(.seconds(10), scheduler: MainScheduler.instance)
             .subscribe { [weak self] event in
                 self?.locationManager.stopUpdatingLocation()
-                self?.fetchWeatherData(for: event.element?.locations.first)
+                if let location = event.element?.locations.first {
+                    self?.fetchWeatherData(for: location)
+                } else {
+                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.Geolocation.Error.locationUnknown))
+                }
             }
             .disposed(by: disposeBag)
         
         locationManager.rx.didError
             .subscribe(onNext: { [weak self] event in
                 if let clError = event.error as? CLError {
-                    self?.coreLocationDidFailWith(clError)
+                    self?.didFailFetchingLocation(clError)
+                } else {
+                    fatalError("the error must be of type CLError")
                 }
             })
             .disposed(by: disposeBag)
     }
     
     // Fetch the weather forecasts in a property, the views must observe it to get forecast events.
-    func fetchWeatherData(for location: CLLocation? = nil) {
+    func fetchWeatherData(for location: CLLocation) {
         
-        guard let unwrappedLocation = location else {
-            fatalError("Unable to fetch weather data, location is missing")
-        }
+        reverseGeocodeCity(for: location)
         
-        reverseGeocodeCity(for: unwrappedLocation)
-        
-        let urlString = getUrlString(from: unwrappedLocation)
+        let urlString = getUrlString(from: location)
         
         weatherService.fetchWeatherForecast(with: urlString)
             .subscribe { [weak self] forecast in
                 self?.weatherForecast.onNext(forecast)
             } onError: { [weak self] error in
-                self?.fetchingState.onNext(.error(error.localizedDescription))
+                self?.didFailFetchingWeather(with: error)
             } onCompleted: {
                 // The completion we observe is the weatherData zip.
             }
@@ -145,6 +146,11 @@ final class WeatherViewModel {
     }
     
     // MARK: - CoreLocation Methods
+    
+    func didTapRetryButton() {
+        
+        locationManager.requestLocation()
+    }
     
     // Use this method to observe the user location authorization status.
     func fetchUserLocation() {
@@ -159,10 +165,9 @@ final class WeatherViewModel {
                 case .notDetermined:
                     self?.locationManager.requestWhenInUseAuthorization()
                 case .denied:
-                    // TODO: - Present an alert to ask the user to go to the app settings and modify the authorization status.
-                    self?.geolocationRestricted.onNext(Constants.Geolocation.Error.denied)
+                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
                 case .restricted:
-                    self?.geolocationRestricted.onNext(Constants.Geolocation.Error.restricted)
+                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
                 @unknown default:
                     print("Unknown location authorization status")
                 }
@@ -181,9 +186,35 @@ final class WeatherViewModel {
         }
     }
     
+    private func didFailFetchingWeather(with error: Error) {
+        
+        guard let weatherServiceError = error as? OpenWeatherServiceError else {
+            fatalError("the error must be of type OpenWeatherServiceError")
+        }
+        
+        let errorMessage: String
+        
+        switch weatherServiceError {
+        case .dataUnavailable:
+            errorMessage = "Data unavailable"
+            print("There was an error fetching Weather data: dataUnavailable")
+        case .responseUnavailable:
+            errorMessage = "Response unavailable"
+            print("There was an error fetching Weather data: responseUnavailable")
+        case .serverSideError(let statusCode):
+            errorMessage = statusCode.description
+            print("There was an error fetching Weather data: \(statusCode.description)")
+        case .transportError(let error):
+            errorMessage = error.localizedDescription
+            print("There was an error fetching Weather data: \(error.localizedDescription)")
+        }
+        
+        fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: errorMessage))
+    }
+    
     // MARK: - Helper Methods
     
-    private func coreLocationDidFailWith(_ error: CLError) {
+    private func didFailFetchingLocation(_ error: CLError) {
         
         let errorMessage: String
         
@@ -198,8 +229,7 @@ final class WeatherViewModel {
             errorMessage = Constants.Geolocation.Error.defaultMessage
         }
         
-        geolocationRestricted
-            .onNext(errorMessage)
+        fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: errorMessage))
     }
     
     private func getUrlString(from location: CLLocation) -> String {
