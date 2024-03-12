@@ -25,7 +25,7 @@ class WeatherViewController: UIViewController {
     
     private func bindings() {
         
-        if let homeView = view as? HomeView {
+        if let homeView = view as? HomeWeatherView {
             self.viewModel = homeView.viewModel
             
             homeView.alertTexts

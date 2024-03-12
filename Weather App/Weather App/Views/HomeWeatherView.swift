@@ -1,5 +1,5 @@
 //
-//  HomeView.swift
+//  HomeWeatherView.swift
 //  Weather App
 //
 //  Created by Berserk on 05/03/2024.
@@ -8,7 +8,7 @@
 import UIKit
 import RxSwift
 
-final class HomeView: UIView {
+final class HomeWeatherView: UIView {
     
     // MARK: - Properties
     
