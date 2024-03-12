@@ -13,6 +13,7 @@ enum Constants {
             static let retryButtonTitle = "Retry"
             static let networkErrorTitle = "Network error"
             static let networkErrorMessage = "Please check your internet connection and retry !"
+            static let loadingLabelText = "Fetching weather.."
         }
     }
     

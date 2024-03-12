@@ -12,6 +12,12 @@ import RxRelay
 import CoreLocation
 import RxCoreLocation
 
+enum FetchingState {
+    case loading
+    case error(_: String)
+    case completed
+}
+
 final class WeatherViewModel {
     
     // MARK: - Properties
@@ -27,14 +33,16 @@ final class WeatherViewModel {
     
     private lazy var observableWeatherData: Observable<(WeatherForecastModel, String)> = {
         return Observable.zip(weatherForecast, currentCity)
-            .map { $0 }
+            .map { [weak self] weatherData in
+                self?.fetchingState.onNext(.completed)
+                return weatherData
+            }
             .share()
             .asObservable()
     }()
     
-    let isLoading = BehaviorSubject<Bool>(value: false)
-    let error = PublishSubject<Error>()
     let geolocationRestricted = PublishSubject<String>()
+    let fetchingState = PublishSubject<FetchingState>()
     
     lazy var currentTemperature: Observable<String>? = {
         return observableWeatherData
@@ -81,7 +89,6 @@ final class WeatherViewModel {
         
         bindActions()
         setupLocationManager()
-        fetchUserLocation()
     }
     
     private func setupLocationManager() {
@@ -93,6 +100,7 @@ final class WeatherViewModel {
     func bindActions() {
         
         localizeUserAction.subscribe(onNext: { [weak self] in
+            self?.fetchingState.onNext(.loading)
             self?.locationManager.requestLocation()
         })
         .disposed(by: disposeBag)
@@ -120,8 +128,6 @@ final class WeatherViewModel {
         guard let unwrappedLocation = location else {
             fatalError("Unable to fetch weather data, location is missing")
         }
-
-        isLoading.onNext(true)
         
         reverseGeocodeCity(for: unwrappedLocation)
         
@@ -130,12 +136,10 @@ final class WeatherViewModel {
         weatherService.fetchWeatherForecast(with: urlString)
             .subscribe { [weak self] forecast in
                 self?.weatherForecast.onNext(forecast)
-                self?.isLoading.onNext(false)
             } onError: { [weak self] error in
-                self?.isLoading.onNext(false)
-                self?.error.onNext(error)
-            } onCompleted: { [weak self] in
-                self?.isLoading.onNext(false)
+                self?.fetchingState.onNext(.error(error.localizedDescription))
+            } onCompleted: {
+                // The completion we observe is the weatherData zip.
             }
             .disposed(by: disposeBag)
     }
@@ -143,7 +147,9 @@ final class WeatherViewModel {
     // MARK: - CoreLocation Methods
     
     // Use this method to observe the user location authorization status.
-    private func fetchUserLocation() {
+    func fetchUserLocation() {
+        
+        fetchingState.onNext(.loading)
         
         locationManager.rx.didChangeAuthorization
             .subscribe(onNext: { [weak self] event in
