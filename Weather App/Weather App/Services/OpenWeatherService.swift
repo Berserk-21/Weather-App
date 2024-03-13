@@ -18,7 +18,7 @@ enum OpenWeatherServiceError: Error {
 final class OpenWeatherService {
     
     /// Use this method to fetch weather data from Open Weather API.
-    func fetchWeatherForecast(with urlString: String) -> Observable<WeatherForecastModel> {
+    func fetchWeatherForecast(with urlString: String) -> Observable<OpenWeatherModel> {
     
         guard let url = URL(string: urlString) else { return Observable.error(NSError(domain: "", code: -1))}
         
@@ -47,7 +47,7 @@ final class OpenWeatherService {
                 }
                 
                 do {
-                    let forecast = try JSONDecoder().decode(WeatherForecastModel.self, from: unwrappedData)
+                    let forecast = try JSONDecoder().decode(OpenWeatherModel.self, from: unwrappedData)
                     observer.onNext(forecast)
                 } catch let err {
                     observer.onError(err)

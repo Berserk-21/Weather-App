@@ -40,7 +40,7 @@ final class HomeWeatherView: UIView {
         super.awakeFromNib()
         
         setupLayout()
-        setupBindings()
+        setupWeatherDataBindings()
         viewModel.fetchUserLocation()
     }
     
@@ -77,36 +77,17 @@ final class HomeWeatherView: UIView {
     
     // MARK: - Binding Methods
     
-    private func setupBindings() {
+    private func setupWeatherDataBindings() {
         
-        viewModel.currentTemperature?
-            .compactMap { $0 }
+        viewModel.observableWeatherData
             .observe(on: MainScheduler.instance)
-            .bind(to: temperatureLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        viewModel.minMaxTemperature?
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .bind(to: maxMinTemperatureLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        viewModel.weatherCodeString?
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .bind(to: weatherCodeLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        viewModel.backgroundImage?
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .bind(to: backgroundImageView.rx.image)
-            .disposed(by: disposeBag)
-        
-        viewModel.cityString?
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .bind(to: cityLabel.rx.text)
+            .subscribe(onNext: { [weak self] weatherData in
+                self?.temperatureLabel.text = weatherData.currentTemperature
+                self?.maxMinTemperatureLabel.text = weatherData.minMaxTemperature
+                self?.cityLabel.text = weatherData.city
+                self?.weatherCodeLabel.text = weatherData.weatherCode
+                self?.backgroundImageView.image = weatherData.backgroundImage
+            })
             .disposed(by: disposeBag)
         
         viewModel.fetchingState
@@ -116,6 +97,46 @@ final class HomeWeatherView: UIView {
             })
             .disposed(by: disposeBag)
     }
+    
+//    private func setupBindings() {
+//        
+//        viewModel.currentTemperature?
+//            .compactMap { $0 }
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: temperatureLabel.rx.text)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.minMaxTemperature?
+//            .compactMap { $0 }
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: maxMinTemperatureLabel.rx.text)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.weatherCodeString?
+//            .compactMap { $0 }
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: weatherCodeLabel.rx.text)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.backgroundImage?
+//            .compactMap { $0 }
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: backgroundImageView.rx.image)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.cityString?
+//            .compactMap { $0 }
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: cityLabel.rx.text)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.fetchingState
+//            .observe(on: MainScheduler.instance)
+//            .subscribe(onNext: { [weak self] state in
+//                self?.updateFetchingStateLayout(for: state)
+//            })
+//            .disposed(by: disposeBag)
+//    }
     
     // MARK: - Coordination Methods
     

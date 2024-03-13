@@ -30,6 +30,7 @@ enum Constants {
     enum FetchingWeather {
         enum Error {
             static let didFail = "Fetching weather failed"
+            static let defaultMessage = "Something was wrong preparing the weather data"
         }
     }
 }

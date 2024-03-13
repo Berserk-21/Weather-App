@@ -15,7 +15,7 @@ import RxCoreLocation
 enum FetchingState {
     case loading
     case error(title: String, message: String)
-    case completed
+    case completed(WeatherDataModel)
 }
 
 final class WeatherViewModel {
@@ -28,59 +28,25 @@ final class WeatherViewModel {
 
     private var disposeBag = DisposeBag()
     
-    private var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
+    private var weatherForecast: PublishSubject<OpenWeatherModel> = PublishSubject()
     private var currentCity: PublishSubject<String> = PublishSubject()
     
-    private lazy var observableWeatherData: Observable<(WeatherForecastModel, String)> = {
+    lazy var observableWeatherData: Observable<(WeatherDataModel)> = {
         return Observable.zip(weatherForecast, currentCity)
             .map { [weak self] weatherData in
-                self?.fetchingState.onNext(.completed)
-                return weatherData
+                
+                if let data = self?.getWeatherData(from: weatherData) {
+                    self?.fetchingState.onNext(.completed(data))
+                    return data
+                } else {
+                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage))
+                    return WeatherDataModel(city: "Dummy", currentTemperature: "Dummy", minMaxTemperature: "Dummy", weatherCode: "Dummy", backgroundImage: UIImage(named: "moon")!)
+                }
             }
-            .share()
             .asObservable()
     }()
     
     let fetchingState = PublishSubject<FetchingState>()
-    
-    lazy var currentTemperature: Observable<String>? = {
-        return observableWeatherData
-            .compactMap { [weak self] in
-                return self?.formatTemperature($0.0.current.temperature_2m)
-            }
-            .asObservable()
-    }()
-    
-    lazy var minMaxTemperature: Observable<String>? = {
-        return observableWeatherData
-            .compactMap { [weak self] in
-                self?.formatExtremeTemperatures(from: $0.0)
-            }
-            .asObservable()
-    }()
-    
-    lazy var weatherCodeString: Observable<String>? = {
-        return observableWeatherData
-            .compactMap { [weak self] in
-                self?.descriptionForWeatherCode($0.0.current.weather_code)
-            }
-            .asObservable()
-    }()
-    
-    lazy var backgroundImage: Observable<UIImage>? = {
-        return observableWeatherData
-            .compactMap { [weak self] in
-                self?.getBackgroundImageForWeatherCode($0.0.current.weather_code)
-            }
-            .asObservable()
-    }()
-    
-    lazy var cityString: Observable<String>? = {
-        return observableWeatherData
-            .compactMap { $0.1 }
-            .asObservable()
-    }()
-    
     let localizeUserAction = PublishSubject<Void>()
     
     init() {
@@ -232,6 +198,17 @@ final class WeatherViewModel {
         fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: errorMessage))
     }
     
+    private func getWeatherData(from weatherData: (OpenWeatherModel, String)) -> WeatherDataModel? {
+        
+        guard let currentTemperature = formatTemperature(weatherData.0.current.temperature_2m) else { return nil }
+        guard let backgroundImage = getBackgroundImageForWeatherCode(weatherData.0.current.weather_code) else { return nil }
+
+        let minMaxTemperature = formatExtremeTemperatures(from: weatherData.0)
+        let weatherCode = descriptionForWeatherCode(weatherData.0.current.weather_code)
+        
+        return WeatherDataModel(city: weatherData.1, currentTemperature: currentTemperature, minMaxTemperature: minMaxTemperature, weatherCode: weatherCode, backgroundImage: backgroundImage)
+    }
+    
     private func getUrlString(from location: CLLocation) -> String {
         
         let latitude = location.coordinate.latitude
@@ -288,7 +265,7 @@ final class WeatherViewModel {
         return temperatureFormatter.string(from: NSNumber(floatLiteral: temperature))
     }
     
-    private func formatExtremeTemperatures(from forecast: WeatherForecastModel) -> String {
+    private func formatExtremeTemperatures(from forecast: OpenWeatherModel) -> String {
         
         var string = ""
         

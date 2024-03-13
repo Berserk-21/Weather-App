@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct WeatherForecastModel: Decodable {
+struct OpenWeatherModel: Decodable {
     
     let latitude: Double
     let longitude: Double
