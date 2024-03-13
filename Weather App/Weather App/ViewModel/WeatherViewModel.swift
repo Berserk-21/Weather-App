@@ -40,6 +40,7 @@ final class WeatherViewModel {
                     return data
                 } else {
                     self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage))
+                    // Later return last fetched weather
                     return WeatherDataModel(city: "Dummy", currentTemperature: "Dummy", minMaxTemperature: "Dummy", weatherCode: "Dummy", backgroundImage: UIImage(named: "moon")!)
                 }
             }
