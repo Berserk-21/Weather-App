@@ -8,34 +8,46 @@
 import Foundation
 import RxSwift
 
+enum OpenWeatherServiceError: Error {
+    case transportError(Error)
+    case responseUnavailable
+    case dataUnavailable
+    case serverSideError(Int)
+}
+
 final class OpenWeatherService {
     
     /// Use this method to fetch weather data from Open Weather API.
-    func fetchWeatherForecast() -> Observable<WeatherForecastModel> {
+    func fetchWeatherForecast(with urlString: String) -> Observable<OpenWeatherModel> {
     
-        // Get the current and hourly weather of the day.
-        let currentWeatherUrlString = "https://api.open-meteo.com/v1/forecast?latitude=43.6109&longitude=3.8763&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
-        
-        guard let url = URL(string: currentWeatherUrlString) else { return Observable.error(NSError(domain: "", code: -1))}
+        guard let url = URL(string: urlString) else { return Observable.error(NSError(domain: "", code: -1))}
         
         return Observable.create { observer in
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 if let error = error {
-                    observer.onError(error)
+                    observer.onError(OpenWeatherServiceError.transportError(error))
                     return
                 }
                 
-                guard let unwrappedData = data else {
-                    return observer.onError(NSError(domain: "no data", code: -2))
+                guard let unwrappedResponse = response as? HTTPURLResponse else {
+                    return observer.onError(OpenWeatherServiceError.responseUnavailable)
                 }
                 
-                // Uncomment for reading json received in a string format.
+                guard let unwrappedData = data else {
+                    return observer.onError(OpenWeatherServiceError.dataUnavailable)
+                }
+                
+                // Uncomment to read the json received in a string format.
 //                if let string = String(data: unwrappedData, encoding: .utf8) {
 //                    print("string: ",string)
 //                }
                 
+                guard (200...299).contains(unwrappedResponse.statusCode) else {
+                    return observer.onError(OpenWeatherServiceError.serverSideError(unwrappedResponse.statusCode))
+                }
+                
                 do {
-                    let forecast = try JSONDecoder().decode(WeatherForecastModel.self, from: unwrappedData)
+                    let forecast = try JSONDecoder().decode(OpenWeatherModel.self, from: unwrappedData)
                     observer.onNext(forecast)
                 } catch let err {
                     observer.onError(err)

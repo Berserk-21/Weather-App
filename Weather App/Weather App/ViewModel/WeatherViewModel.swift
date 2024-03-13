@@ -9,87 +9,215 @@ import Foundation
 import RxSwift
 import RxCocoa
 import RxRelay
+import CoreLocation
+import RxCoreLocation
+
+enum FetchingState {
+    case loading
+    case error(title: String, message: String)
+    case completed(WeatherDataModel)
+}
 
 final class WeatherViewModel {
     
     // MARK: - Properties
     
     private let weatherService: OpenWeatherService
-    
-    // BehaviosSubject emits an initial value (what is set in the instanciation).
-    // PublishSubject emits only value after the subscription is made.
-//    var weatherForecast: BehaviorSubject<WeatherForecast?> = BehaviorSubject(value: nil)
-    var weatherForecast: PublishSubject<WeatherForecastModel> = PublishSubject()
-    
+    private let locationManager = CLLocationManager()
+    private let temperatureFormatter = NumberFormatter()
+
     private var disposeBag = DisposeBag()
     
-    let temperatureFormatter = NumberFormatter()
+    private var weatherForecast: PublishSubject<OpenWeatherModel> = PublishSubject()
+    private var currentCity: PublishSubject<String> = PublishSubject()
     
-    let isLoading = BehaviorSubject<Bool>(value: false)
-    let error = PublishSubject<Error>()
-    
-    lazy var currentTemperature: Observable<String>? = {
-        return weatherForecast
-            .compactMap { [weak self] in
-                self?.formatTemperature($0.current.temperature_2m)
+    lazy var observableWeatherData: Observable<(WeatherDataModel)> = {
+        return Observable.zip(weatherForecast, currentCity)
+            .map { [weak self] weatherData in
+                
+                if let data = self?.getWeatherData(from: weatherData) {
+                    self?.fetchingState.onNext(.completed(data))
+                    return data
+                } else {
+                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage))
+                    // Later return last fetched weather
+                    return WeatherDataModel(city: "Dummy", currentTemperature: "Dummy", minMaxTemperature: "Dummy", weatherCode: "Dummy", backgroundImage: UIImage(named: "moon")!)
+                }
             }
             .asObservable()
     }()
     
-    lazy var minMaxTemperature: Observable<String>? = {
-        return weatherForecast
-            .compactMap { [weak self] in
-                self?.formatExtremeTemperatures(from: $0)
-            }
-            .asObservable()
-    }()
-    
-    lazy var weatherCodeString: Observable<String>? = {
-        return weatherForecast
-            .compactMap { [weak self] in
-                self?.descriptionForWeatherCode($0.current.weather_code)
-            }
-            .asObservable()
-    }()
-    
-    lazy var backgroundImage: Observable<UIImage>? = {
-        return weatherForecast
-            .compactMap { [weak self] in
-                self?.getBackgroundImageForWeatherCode($0.current.weather_code)
-            }
-            .asObservable()
-    }()
-    
-    lazy var cityString: Observable<String>? = {
-        return weatherForecast
-            .compactMap { _ in
-                return "Montpellier"
-            }
-            .asObservable()
-    }()
+    let fetchingState = PublishSubject<FetchingState>()
+    let localizeUserAction = PublishSubject<Void>()
     
     init() {
         weatherService = OpenWeatherService()
         
-        fetchWeatherData()
+        bindActions()
+        setupLocationManager()
     }
     
-    // Fetch weather forecast in a property, the views must observe it to get forecast events.
-    func fetchWeatherData() {
+    private func setupLocationManager() {
+        locationManager.allowsBackgroundLocationUpdates = false
+        locationManager.distanceFilter = 1000
+        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+    }
+    
+    func bindActions() {
         
-        isLoading.onNext(true)
+        localizeUserAction.subscribe(onNext: { [weak self] in
+            self?.fetchingState.onNext(.loading)
+            self?.locationManager.requestLocation()
+        })
+        .disposed(by: disposeBag)
         
-        weatherService.fetchWeatherForecast()
-            .subscribe { [weak self] forecast in
-                self?.weatherForecast.onNext(forecast)
-                self?.isLoading.onNext(false)
-            } onError: { [weak self] error in
-                self?.isLoading.onNext(false)
-                self?.error.onNext(error)
-            } onCompleted: { [weak self] in
-                self?.isLoading.onNext(false)
+        locationManager.rx.didUpdateLocations
+            .throttle(.seconds(10), scheduler: MainScheduler.instance)
+            .subscribe { [weak self] event in
+                self?.locationManager.stopUpdatingLocation()
+                if let location = event.element?.locations.first {
+                    self?.fetchWeatherData(for: location)
+                } else {
+                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.Geolocation.Error.locationUnknown))
+                }
             }
             .disposed(by: disposeBag)
+        
+        locationManager.rx.didError
+            .subscribe(onNext: { [weak self] event in
+                if let clError = event.error as? CLError {
+                    self?.didFailFetchingLocation(clError)
+                } else {
+                    fatalError("the error must be of type CLError")
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    // Fetch the weather forecasts in a property, the views must observe it to get forecast events.
+    func fetchWeatherData(for location: CLLocation) {
+        
+        reverseGeocodeCity(for: location)
+        
+        let urlString = getUrlString(from: location)
+        
+        weatherService.fetchWeatherForecast(with: urlString)
+            .subscribe { [weak self] forecast in
+                self?.weatherForecast.onNext(forecast)
+            } onError: { [weak self] error in
+                self?.didFailFetchingWeather(with: error)
+            } onCompleted: {
+                // The completion we observe is the weatherData zip.
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    // MARK: - CoreLocation Methods
+    
+    func didTapRetryButton() {
+        
+        locationManager.requestLocation()
+    }
+    
+    // Use this method to observe the user location authorization status.
+    func fetchUserLocation() {
+        
+        fetchingState.onNext(.loading)
+        
+        locationManager.rx.didChangeAuthorization
+            .subscribe(onNext: { [weak self] event in
+                switch event.status {
+                case .authorizedAlways, .authorizedWhenInUse:
+                    self?.locationManager.requestLocation()
+                case .notDetermined:
+                    self?.locationManager.requestWhenInUseAuthorization()
+                case .denied:
+                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
+                case .restricted:
+                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
+                @unknown default:
+                    print("Unknown location authorization status")
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func reverseGeocodeCity(for location: CLLocation) {
+        
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let placemark = placemarks?.first, let city = placemark.locality {
+                self.currentCity
+                    .onNext(city)
+            }
+        }
+    }
+    
+    private func didFailFetchingWeather(with error: Error) {
+        
+        guard let weatherServiceError = error as? OpenWeatherServiceError else {
+            fatalError("the error must be of type OpenWeatherServiceError")
+        }
+        
+        let errorMessage: String
+        
+        switch weatherServiceError {
+        case .dataUnavailable:
+            errorMessage = "Data unavailable"
+            print("There was an error fetching Weather data: dataUnavailable")
+        case .responseUnavailable:
+            errorMessage = "Response unavailable"
+            print("There was an error fetching Weather data: responseUnavailable")
+        case .serverSideError(let statusCode):
+            errorMessage = statusCode.description
+            print("There was an error fetching Weather data: \(statusCode.description)")
+        case .transportError(let error):
+            errorMessage = error.localizedDescription
+            print("There was an error fetching Weather data: \(error.localizedDescription)")
+        }
+        
+        fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: errorMessage))
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func didFailFetchingLocation(_ error: CLError) {
+        
+        let errorMessage: String
+        
+        switch error.code {
+        case .locationUnknown:
+            errorMessage = Constants.Geolocation.Error.locationUnknown
+        case .denied:
+            errorMessage = Constants.Geolocation.Error.denied
+        case .network:
+            errorMessage = Constants.Geolocation.Error.network
+        default:
+            errorMessage = Constants.Geolocation.Error.defaultMessage
+        }
+        
+        fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: errorMessage))
+    }
+    
+    private func getWeatherData(from weatherData: (OpenWeatherModel, String)) -> WeatherDataModel? {
+        
+        guard let currentTemperature = formatTemperature(weatherData.0.current.temperature_2m) else { return nil }
+        guard let backgroundImage = getBackgroundImageForWeatherCode(weatherData.0.current.weather_code) else { return nil }
+
+        let minMaxTemperature = formatExtremeTemperatures(from: weatherData.0)
+        let weatherCode = descriptionForWeatherCode(weatherData.0.current.weather_code)
+        
+        return WeatherDataModel(city: weatherData.1, currentTemperature: currentTemperature, minMaxTemperature: minMaxTemperature, weatherCode: weatherCode, backgroundImage: backgroundImage)
+    }
+    
+    private func getUrlString(from location: CLLocation) -> String {
+        
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        
+        let coordinateString: String = "https://api.open-meteo.com/v1/forecast?latitude=\(latitude)&longitude=\(longitude)&current=temperature_2m,weather_code,cloud_cover&hourly=temperature_2m&forecast_days=1"
+        
+        return coordinateString
     }
     
     private func descriptionForWeatherCode(_ code: Int) -> String {
@@ -132,13 +260,13 @@ final class WeatherViewModel {
     }
     
     private func formatTemperature(_ temperature: CGFloat) -> String? {
-        temperatureFormatter.roundingMode = .halfDown
+        temperatureFormatter.roundingMode = .down
         temperatureFormatter.maximumFractionDigits = 0
         
         return temperatureFormatter.string(from: NSNumber(floatLiteral: temperature))
     }
     
-    private func formatExtremeTemperatures(from forecast: WeatherForecastModel) -> String {
+    private func formatExtremeTemperatures(from forecast: OpenWeatherModel) -> String {
         
         var string = ""
         
