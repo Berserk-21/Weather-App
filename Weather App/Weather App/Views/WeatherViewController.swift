@@ -38,7 +38,7 @@ final class WeatherViewController: UIViewController {
     
     private func setupBarButton() {
         
-        let rightBarButton = UIBarButtonItem(image: UIImage(named: "localize_user"), style: .done, target: nil, action: nil)
+        let rightBarButton = UIBarButtonItem(image: UIImage(named: "refresh"), style: .done, target: nil, action: nil)
         rightBarButton.tintColor = .white
         navigationItem.rightBarButtonItem = rightBarButton
         
