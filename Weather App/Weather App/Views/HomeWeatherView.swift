@@ -23,11 +23,14 @@ final class HomeWeatherView: UIView {
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
     @IBOutlet private weak var backgroundImageView: UIImageView!
     @IBOutlet private weak var filterView: UIView!
-    @IBOutlet private weak var retryButton: UIButton!
+    @IBOutlet private weak var settingsButton: UIButton!
+    @IBOutlet private weak var settingsLabel: UILabel!
+    @IBOutlet private weak var settingsVisualEffectView: UIVisualEffectView!
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet private weak var loadingLabel: UILabel!
     
     var alertTexts: PublishSubject<(String, String)> = PublishSubject()
+    var goToSettings: PublishSubject<Bool> = PublishSubject()
     
     // MARK: - Life Cycle
     
@@ -68,8 +71,12 @@ final class HomeWeatherView: UIView {
         
         filterView.alpha = 0.2
         
-        retryButton.setTitle(Constants.Views.HomeView.retryButtonTitle, for: .normal)
-        retryButton.isHidden = true
+        settingsVisualEffectView.isHidden = true
+        settingsButton.setTitle(Constants.Views.HomeView.settingsButtonTitle, for: .normal)
+        
+        settingsLabel.text = Constants.Views.HomeView.settingsLabelText
+        settingsLabel.font = UIFont.systemFont(ofSize: 14.0, weight: .light)
+        settingsLabel.textColor = .white
         
         loadingLabel.text = Constants.Views.HomeView.loadingLabelText
         loadingLabel.textColor = .white
@@ -82,11 +89,7 @@ final class HomeWeatherView: UIView {
         viewModel.observableWeatherData
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] weatherData in
-                self?.temperatureLabel.text = weatherData.currentTemperature
-                self?.maxMinTemperatureLabel.text = weatherData.minMaxTemperature
-                self?.cityLabel.text = weatherData.city
-                self?.weatherCodeLabel.text = weatherData.weatherCode
-                self?.backgroundImageView.image = weatherData.backgroundImage
+                self?.presentWeatherData(weatherData)
             })
             .disposed(by: disposeBag)
         
@@ -106,22 +109,21 @@ final class HomeWeatherView: UIView {
         case .loading:
             activityIndicator.startAnimating()
             filterView.alpha = 0.8
-            retryButton.isHidden = true
+            settingsVisualEffectView.isHidden = true
             loadingLabel.isHidden = false
             contentView.isHidden = true
         case .error(let title, let message):
             activityIndicator.stopAnimating()
             filterView.alpha = 0.8
-            retryButton.isHidden = false
+            settingsVisualEffectView.isHidden = false
             loadingLabel.isHidden = true
             contentView.isHidden = true
             presentAlert(title: title, message: message)
         case .completed:
             activityIndicator.stopAnimating()
-            filterView.alpha = 0.2
-            retryButton.isHidden = true
             loadingLabel.isHidden = true
             contentView.isHidden = false
+            settingsVisualEffectView.isHidden = true
         }
     }
     
@@ -131,11 +133,35 @@ final class HomeWeatherView: UIView {
             .onNext((title, message))
     }
     
+    private func presentWeatherData(_ weatherData: WeatherDataModel, animate: Bool = true) {
+        
+        if animate {
+            UIView.animate(withDuration: 0.8) {
+                self.temperatureLabel.text = weatherData.currentTemperature
+                self.maxMinTemperatureLabel.text = weatherData.minMaxTemperature
+                self.cityLabel.text = weatherData.city
+                self.weatherCodeLabel.text = weatherData.weatherCode
+                self.backgroundImageView.image = weatherData.backgroundImage
+                self.filterView.alpha = 0.2
+            }
+        } else {
+            temperatureLabel.text = weatherData.currentTemperature
+            maxMinTemperatureLabel.text = weatherData.minMaxTemperature
+            cityLabel.text = weatherData.city
+            weatherCodeLabel.text = weatherData.weatherCode
+            backgroundImageView.image = weatherData.backgroundImage
+            filterView.alpha = 0.2
+        }
+        
+        layoutIfNeeded()
+    }
+    
     // MARK: - Actions
     
     @IBAction func didTapRetryButton(_ sender: Any) {
         
-        viewModel.didTapRetryButton()
+        goToSettings
+            .onNext(true)
     }
     
 }

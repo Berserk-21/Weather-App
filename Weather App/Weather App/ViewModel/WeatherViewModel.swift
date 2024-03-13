@@ -114,11 +114,6 @@ final class WeatherViewModel {
     
     // MARK: - CoreLocation Methods
     
-    func didTapRetryButton() {
-        
-        locationManager.requestLocation()
-    }
-    
     // Use this method to observe the user location authorization status.
     func fetchUserLocation() {
         

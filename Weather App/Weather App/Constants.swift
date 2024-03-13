@@ -10,16 +10,17 @@ import Foundation
 enum Constants {
     enum Views {
         enum HomeView {
-            static let retryButtonTitle = "Retry"
+            static let settingsButtonTitle = "Settings"
             static let networkErrorMessage = "Please check your internet connection and retry !"
             static let loadingLabelText = "Fetching weather.."
+            static let settingsLabelText = "Go to Privacy -> Locations Services -> Weather App"
         }
     }
     
     enum Geolocation {
         enum Error {
             static let locationUnknown = "location is currently unknown"
-            static let denied = "Please check your privacy settings:\nSettings -> Privacy -> Locations Services -> Weather App"
+            static let denied = "Please allow our app to locate you !"
             static let network = "Geolocation network error"
             static let defaultMessage = "Unable to get a location, please check your privacy settings"
             static let title = "Location unavailable"

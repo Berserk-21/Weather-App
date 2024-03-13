@@ -93,29 +93,54 @@
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="3UL-fd-1GL">
                                 <rect key="frame" x="186.66666666666666" y="450.66666666666669" width="20" height="20"/>
                             </activityIndicatorView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sEu-db-scP">
-                                <rect key="frame" x="175.66666666666666" y="478.66666666666669" width="42" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loading.." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sEu-db-scP">
+                                <rect key="frame" x="161.66666666666666" y="478.66666666666669" width="70" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Pz-Tq-Esk">
-                                <rect key="frame" x="164.33333333333334" y="655.66666666666663" width="64.666666666666657" height="34.333333333333371"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Retry"/>
-                                <connections>
-                                    <action selector="didTapRetryButton:" destination="8bC-Xf-vdC" eventType="touchUpInside" id="Ch8-MF-8d9"/>
-                                </connections>
-                            </button>
+                            <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1RA-CM-dxB">
+                                <rect key="frame" x="0.0" y="681" width="393" height="171"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="neq-TQ-xCC">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="171"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xLZ-RS-CNd">
+                                            <rect key="frame" x="153" y="16.000000000000004" width="87" height="34.333333333333343"/>
+                                            <state key="normal" title="Button"/>
+                                            <buttonConfiguration key="configuration" style="filled" title="Settings"/>
+                                            <connections>
+                                                <action selector="didTapRetryButton:" destination="8bC-Xf-vdC" eventType="touchUpInside" id="PvD-YD-REK"/>
+                                            </connections>
+                                        </button>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Settings -&gt; Privacy -&gt; Locations Services -&gt; Weather App&quot;" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zmc-oE-yVF">
+                                            <rect key="frame" x="16" y="66.333333333333371" width="361" height="40.666666666666657"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="xLZ-RS-CNd" firstAttribute="top" secondItem="neq-TQ-xCC" secondAttribute="top" constant="16" id="21c-G5-Xkk"/>
+                                        <constraint firstAttribute="bottom" secondItem="zmc-oE-yVF" secondAttribute="bottom" constant="64" id="Kgm-gg-Bnx"/>
+                                        <constraint firstItem="zmc-oE-yVF" firstAttribute="top" secondItem="xLZ-RS-CNd" secondAttribute="bottom" constant="16" id="VT7-LV-jqZ"/>
+                                        <constraint firstItem="zmc-oE-yVF" firstAttribute="leading" secondItem="neq-TQ-xCC" secondAttribute="leading" constant="16" id="fNN-Kq-bRp"/>
+                                        <constraint firstItem="xLZ-RS-CNd" firstAttribute="centerX" secondItem="neq-TQ-xCC" secondAttribute="centerX" id="iok-he-LBK"/>
+                                        <constraint firstAttribute="trailing" secondItem="zmc-oE-yVF" secondAttribute="trailing" constant="16" id="pIS-fB-jHh"/>
+                                    </constraints>
+                                </view>
+                                <blurEffect style="regular"/>
+                            </visualEffectView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="1RA-CM-dxB" secondAttribute="trailing" id="0aX-cY-3ia"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="K3s-dN-G3C" secondAttribute="bottom" id="2hd-EK-AFd"/>
-                            <constraint firstItem="8Pz-Tq-Esk" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="BIi-Gk-r5s"/>
+                            <constraint firstAttribute="bottom" secondItem="1RA-CM-dxB" secondAttribute="bottom" id="Ac2-Po-Fti"/>
                             <constraint firstItem="O4q-mh-GQj" firstAttribute="top" secondItem="N0B-iP-3Oq" secondAttribute="top" id="Ejt-6D-KZ2"/>
+                            <constraint firstItem="1RA-CM-dxB" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Ikx-dS-c0p"/>
                             <constraint firstItem="O4q-mh-GQj" firstAttribute="bottom" secondItem="N0B-iP-3Oq" secondAttribute="bottom" id="Lth-qk-wjC"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="8Pz-Tq-Esk" secondAttribute="bottom" constant="128" id="MJA-aY-P7l"/>
                             <constraint firstItem="sEu-db-scP" firstAttribute="top" secondItem="3UL-fd-1GL" secondAttribute="bottom" constant="8" id="QYs-IO-tTd"/>
                             <constraint firstItem="K3s-dN-G3C" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="RF6-Ni-tCg"/>
                             <constraint firstItem="sEu-db-scP" firstAttribute="centerX" secondItem="3UL-fd-1GL" secondAttribute="centerX" id="TEF-JE-Mur"/>
@@ -138,7 +163,9 @@
                             <outlet property="filterView" destination="O4q-mh-GQj" id="fkG-Dj-qPh"/>
                             <outlet property="loadingLabel" destination="sEu-db-scP" id="BbG-kR-rwm"/>
                             <outlet property="maxMinTemperatureLabel" destination="e4o-RG-kiC" id="BWR-Mb-ZUc"/>
-                            <outlet property="retryButton" destination="8Pz-Tq-Esk" id="v8I-7Z-NXE"/>
+                            <outlet property="settingsButton" destination="xLZ-RS-CNd" id="2ka-Nj-rE2"/>
+                            <outlet property="settingsLabel" destination="zmc-oE-yVF" id="nTa-Xt-376"/>
+                            <outlet property="settingsVisualEffectView" destination="1RA-CM-dxB" id="q4w-Sw-MDM"/>
                             <outlet property="temperatureDegreeLabel" destination="ivi-lv-eOk" id="3ig-UQ-ALY"/>
                             <outlet property="temperatureLabel" destination="QUH-Be-LoF" id="AdL-vJ-4gb"/>
                             <outlet property="weatherCodeLabel" destination="lVH-EC-xVD" id="mLM-eD-7ia"/>

@@ -33,6 +33,12 @@ final class WeatherViewController: UIViewController {
                     self?.presentAlertWith(title: title, message: message)
                 })
                 .disposed(by: disposeBag)
+            
+            homeView.goToSettings
+                .subscribe(onNext: { [weak self] _ in
+                    self?.goToSettings()
+                })
+                .disposed(by: disposeBag)
         }
     }
     
@@ -52,6 +58,13 @@ final class WeatherViewController: UIViewController {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: "OK", style: .default))
         self.present(alertController, animated: true)
+    }
+    
+    private func goToSettings() {
+        
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
     }
     
 }
