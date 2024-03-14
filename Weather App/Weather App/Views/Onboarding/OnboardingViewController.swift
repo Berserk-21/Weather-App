@@ -27,7 +27,12 @@ class OnboardingViewController: UIViewController, CoordinatorInterface {
                     self?.coordinator?.didEndOnboarding()
                 })
                 .disposed(by: disposeBag)
+            
+            onboardingView.viewModel.didTapOpenSettings
+                .subscribe(onNext: { [weak self] _ in
+                    self?.coordinator?.goToSettings()
+                })
+                .disposed(by: disposeBag)
         }
     }
-        
 }

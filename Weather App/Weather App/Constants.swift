@@ -17,8 +17,11 @@ enum Constants {
         }
         
         enum OnboardingView {
-            static let localizeWeatherText = "We need your authorization to fetch the weather of your current city !"
-            static let authorizeButtonTitle = "Fetch my city !"
+            static let localWeatherLabelText = "We need your authorization to fetch the weather of your current city !"
+            static let notDeterminedTitle = "Fetch my city !"
+            static let deniedTitle = "Settings"
+            static let restrictedTitle = "GPS unavailable"
+            static let restrictedSettingsText = "There is a problem with the GPS of your device !"
         }
     }
     

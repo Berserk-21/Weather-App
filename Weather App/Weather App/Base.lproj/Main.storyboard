@@ -195,9 +195,9 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cz4-BJ-YxL">
-                                <rect key="frame" x="0.0" y="690" width="393" height="162"/>
+                                <rect key="frame" x="0.0" y="664.66666666666663" width="393" height="187.33333333333337"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="iDZ-Vy-nMi">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="162"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="187"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UKk-Zh-Jun">
@@ -205,15 +205,22 @@
                                             <state key="normal" title="Button"/>
                                             <buttonConfiguration key="configuration" style="filled" title="Fetch my city !"/>
                                         </button>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Settings -&gt; Privacy -&gt; Locations Services -&gt; Weather App&quot;" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kWC-x0-yYa">
+                                            <rect key="frame" x="16" y="83" width="361" height="40.666666666666657"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
+                                        <constraint firstItem="kWC-x0-yYa" firstAttribute="top" secondItem="UKk-Zh-Jun" secondAttribute="bottom" constant="16" id="LUt-nS-kgO"/>
                                         <constraint firstItem="UKk-Zh-Jun" firstAttribute="top" secondItem="iDZ-Vy-nMi" secondAttribute="top" constant="32" id="NTX-W7-Pup"/>
                                         <constraint firstItem="UKk-Zh-Jun" firstAttribute="centerX" secondItem="iDZ-Vy-nMi" secondAttribute="centerX" id="VAc-Np-sq1"/>
+                                        <constraint firstAttribute="trailing" secondItem="kWC-x0-yYa" secondAttribute="trailing" constant="16" id="b2f-XO-gvn"/>
+                                        <constraint firstAttribute="bottom" secondItem="kWC-x0-yYa" secondAttribute="bottom" constant="64" id="bnI-Ep-6bd"/>
+                                        <constraint firstItem="kWC-x0-yYa" firstAttribute="leading" secondItem="iDZ-Vy-nMi" secondAttribute="leading" constant="16" id="fl3-lO-sga"/>
                                     </constraints>
                                 </view>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="162" id="49c-NJ-Q61"/>
-                                </constraints>
                                 <blurEffect style="regular"/>
                             </visualEffectView>
                         </subviews>
@@ -234,6 +241,7 @@
                             <outlet property="authorizeButton" destination="UKk-Zh-Jun" id="OsR-P1-2Yy"/>
                             <outlet property="backgroundImageView" destination="N9g-wE-6ct" id="WQe-Vr-Ifr"/>
                             <outlet property="localWeatherLabel" destination="0sO-Bz-i8r" id="hB3-0n-f28"/>
+                            <outlet property="settingsLabel" destination="kWC-x0-yYa" id="pIe-2B-Dhd"/>
                         </connections>
                     </view>
                 </viewController>

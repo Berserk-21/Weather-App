@@ -10,6 +10,12 @@ import RxSwift
 import RxCoreLocation
 import CoreLocation
 
+enum LocationAuthorizationState {
+    case denied
+    case restricted
+    case notDetermined
+}
+
 final class OnboardingViewModel {
     
     // MARK: - Properties
@@ -17,7 +23,9 @@ final class OnboardingViewModel {
     private let locationManager = CLLocationManager()
     private var disposeBag = DisposeBag()
     
+    var didTapOpenSettings = PublishSubject<Void>()
     var didEndOnboarding = PublishSubject<Void>()
+    var locationState = PublishSubject<LocationAuthorizationState>()
     
     // MARK: - Life Cycle
     
@@ -39,19 +47,16 @@ final class OnboardingViewModel {
 
     private func setupBindinds() {
         
-        guard locationManager.authorizationStatus == .notDetermined else {
-            fatalError("The authorization status is already determined. Do not forget to handle this case with a go to settings button")
-        }
-        
         locationManager.rx.didChangeAuthorization
             .subscribe(onNext: { [weak self] event in
                 switch event.status {
                 case .notDetermined:
                     print("geolocation is notDetermined")
                 case .denied:
-                    print("geolocation is denied")
+                    self?.locationState.onNext(.denied)
                 case .restricted:
                     print("geolocation is restricted")
+                    self?.locationState.onNext(.restricted)
                 case .authorizedAlways, .authorizedWhenInUse:
                     print("geolocation is authorized")
                     self?.didEndOnboarding.onNext(())
@@ -60,6 +65,22 @@ final class OnboardingViewModel {
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    func determineInitialState() {
+                
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationState.onNext(.notDetermined)
+        case .authorizedAlways, .authorizedWhenInUse:
+            didEndOnboarding.onNext(())
+        case .denied:
+            locationState.onNext(.denied)
+        case .restricted:
+            locationState.onNext(.restricted)
+        default:
+            break
+        }
     }
     
     // MARK: - Core Location Methods

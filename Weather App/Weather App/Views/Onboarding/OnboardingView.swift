@@ -18,8 +18,9 @@ final class OnboardingView: UIView {
     
     @IBOutlet private weak var backgroundImageView: UIImageView!
     @IBOutlet private weak var localWeatherLabel: UILabel!
-    @IBOutlet private weak var authorizeButton: UIButton!
-        
+    @IBOutlet weak var authorizeButton: UIButton!
+    @IBOutlet private weak var settingsLabel: UILabel!
+    
     // MARK: - Life Cycle
     
     override func awakeFromNib() {
@@ -27,29 +28,70 @@ final class OnboardingView: UIView {
         
         setupLayout()
         binding()
+        setupInitialState()
+    }
+    
+    private func setupInitialState() {
+        
+        viewModel.determineInitialState()
     }
     
     private func binding() {
         
-        authorizeButton.rx.tap
-            .subscribe(onNext: { [weak self] _ in
-                self?.viewModel.requestGeolocationAuthorization()
+        viewModel.locationState
+            .subscribe(onNext: { [weak self] state in
+                self?.updateLayout(for: state)
             })
+            .disposed(by: disposeBag)
+        
+        authorizeButton.rx.tap
+            .withLatestFrom(viewModel.locationState)
+            .subscribe { [weak self] event in
+                if let state = event.element {
+                    switch state {
+                    case .notDetermined:
+                        self?.viewModel.requestGeolocationAuthorization()
+                    case .denied:
+                        self?.viewModel.didTapOpenSettings.onNext(())
+                    default:
+                        break
+                    }
+                }
+            }
             .disposed(by: disposeBag)
     }
 
     // MARK: - Setup Layout
     
     private func setupLayout() {
-        
         backgroundImageView.image = UIImage(named: "earth")
         
-        localWeatherLabel.text = Constants.Views.OnboardingView.localizeWeatherText
         localWeatherLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         localWeatherLabel.textColor = .white
         localWeatherLabel.textAlignment = .center
+    }
+    
+    private func updateLayout(for state: LocationAuthorizationState) {
         
-        authorizeButton.setTitle(Constants.Views.OnboardingView.authorizeButtonTitle, for: .normal)
+        let buttonTitle: String
+        var settingsText: String = ""
+        
+        localWeatherLabel.text = Constants.Views.OnboardingView.localWeatherLabelText
+        
+        switch state {
+        case .notDetermined:
+            buttonTitle = Constants.Views.OnboardingView.notDeterminedTitle
+        case .denied:
+            buttonTitle = Constants.Views.OnboardingView.deniedTitle
+            settingsText = Constants.Views.HomeView.settingsLabelText
+        case .restricted:
+            buttonTitle = Constants.Views.OnboardingView.restrictedTitle
+            settingsText = Constants.Views.OnboardingView.restrictedSettingsText
+        }
+        
+        localWeatherLabel.text = Constants.Views.OnboardingView.localWeatherLabelText
+        authorizeButton.setTitle(buttonTitle, for: .normal)
+        settingsLabel.text = settingsText
     }
     
 }
