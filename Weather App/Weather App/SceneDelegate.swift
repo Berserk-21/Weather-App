@@ -20,6 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
         let window = UIWindow(windowScene: windowScene)
+        
         coordinator = Coordinator(storyboard: storyboard, window: window)
         coordinator?.start()
     }

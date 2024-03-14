@@ -34,4 +34,18 @@ enum Constants {
             static let defaultMessage = "Something was wrong preparing the weather data"
         }
     }
+    
+    enum UserDefaults {
+        static let didSeeOnboarding = "didSeeOnboarding"
+    }
+    
+    enum SegueIdentifiers {
+        static let fromHomeToOnboarding = "fromHomeToOnboarding"
+    }
+    
+    enum StoryboardIdentifiers {
+        static let OnboardingViewController = "OnboardingViewController"
+        static let WeatherViewController = "WeatherViewController"
+        static let WeatherNavigationController = "WeatherNavigationController"
+    }
 }
