@@ -15,6 +15,11 @@ enum Constants {
             static let loadingLabelText = "Fetching weather.."
             static let settingsLabelText = "Go to Privacy -> Locations Services -> Weather App"
         }
+        
+        enum OnboardingView {
+            static let localizeWeatherText = "We need your authorization to fetch the weather of your current city !"
+            static let authorizeButtonTitle = "Fetch my city !"
+        }
     }
     
     enum Geolocation {
