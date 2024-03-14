@@ -25,7 +25,7 @@ final class Coordinator {
         
         // Force starting with onboarding.
         #if DEBUG
-        UserDefaults.standard.setValue(false, forKey: Constants.UserDefaults.didSeeOnboarding)
+//        UserDefaults.standard.setValue(false, forKey: Constants.UserDefaults.didPresentOnboarding)
         #endif
         
         guard let vc = getViewController() else {
@@ -64,12 +64,14 @@ final class Coordinator {
     
     private func didPresentOnboarding() -> Bool {
                 
-        return UserDefaults.standard.bool(forKey: Constants.UserDefaults.didSeeOnboarding)
+        return UserDefaults.standard.bool(forKey: Constants.UserDefaults.didPresentOnboarding)
     }
     
     func didEndOnboarding() {
         
-        guard let weatherVC = getViewController() as? WeatherViewController else {
+        UserDefaults.standard.setValue(true, forKey: Constants.UserDefaults.didPresentOnboarding)
+        
+        guard let weatherVC = getViewController() as? UINavigationController else {
             fatalError("Could not instantiate a WeatherViewController")
         }
         

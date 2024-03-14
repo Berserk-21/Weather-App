@@ -36,7 +36,7 @@ enum Constants {
     }
     
     enum UserDefaults {
-        static let didSeeOnboarding = "didSeeOnboarding"
+        static let didPresentOnboarding = "didPresentOnboarding"
     }
     
     enum SegueIdentifiers {

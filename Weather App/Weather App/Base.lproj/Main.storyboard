@@ -181,30 +181,65 @@
         <scene sceneID="Bzr-5a-0bf">
             <objects>
                 <viewController storyboardIdentifier="OnboardingViewController" id="bdE-Yi-rtI" customClass="OnboardingViewController" customModule="Weather_App" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Ldt-gM-iKh">
+                    <view key="view" contentMode="scaleToFill" id="Ldt-gM-iKh" customClass="OnboardingView" customModule="Weather_App" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zpM-V0-FOY">
-                                <rect key="frame" x="159" y="421" width="75" height="35"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
-                                <connections>
-                                    <action selector="didTapEndOnboarding" destination="bdE-Yi-rtI" eventType="touchUpInside" id="Gqy-4k-cZO"/>
-                                </connections>
-                            </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="N9g-wE-6ct">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="We need your authorization to fetch the weather of your current city !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0sO-Bz-i8r">
+                                <rect key="frame" x="16" y="154" width="361" height="40.666666666666657"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cz4-BJ-YxL">
+                                <rect key="frame" x="0.0" y="690" width="393" height="162"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="iDZ-Vy-nMi">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="162"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UKk-Zh-Jun">
+                                            <rect key="frame" x="129" y="32" width="135" height="35"/>
+                                            <state key="normal" title="Button"/>
+                                            <buttonConfiguration key="configuration" style="filled" title="Fetch my city !"/>
+                                        </button>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="UKk-Zh-Jun" firstAttribute="top" secondItem="iDZ-Vy-nMi" secondAttribute="top" constant="32" id="NTX-W7-Pup"/>
+                                        <constraint firstItem="UKk-Zh-Jun" firstAttribute="centerX" secondItem="iDZ-Vy-nMi" secondAttribute="centerX" id="VAc-Np-sq1"/>
+                                    </constraints>
+                                </view>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="162" id="49c-NJ-Q61"/>
+                                </constraints>
+                                <blurEffect style="regular"/>
+                            </visualEffectView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="5UC-oT-uCJ"/>
-                        <color key="backgroundColor" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="zpM-V0-FOY" firstAttribute="centerY" secondItem="5UC-oT-uCJ" secondAttribute="centerY" id="Srw-vY-ed3"/>
-                            <constraint firstItem="zpM-V0-FOY" firstAttribute="centerX" secondItem="5UC-oT-uCJ" secondAttribute="centerX" id="dgb-6r-E7s"/>
+                            <constraint firstItem="0sO-Bz-i8r" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" constant="16" id="8Dm-HZ-YS9"/>
+                            <constraint firstItem="0sO-Bz-i8r" firstAttribute="top" secondItem="5UC-oT-uCJ" secondAttribute="top" constant="95" id="A4w-gT-0W3"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="0sO-Bz-i8r" secondAttribute="trailing" constant="16" id="X8U-QP-7gx"/>
+                            <constraint firstItem="N9g-wE-6ct" firstAttribute="top" secondItem="Ldt-gM-iKh" secondAttribute="top" id="aPi-sq-UWg"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="Cz4-BJ-YxL" secondAttribute="trailing" id="lAL-YN-og6"/>
+                            <constraint firstAttribute="bottom" secondItem="N9g-wE-6ct" secondAttribute="bottom" id="nLo-PL-zKq"/>
+                            <constraint firstItem="N9g-wE-6ct" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" id="ohd-k6-YdY"/>
+                            <constraint firstItem="Cz4-BJ-YxL" firstAttribute="bottom" secondItem="Ldt-gM-iKh" secondAttribute="bottom" id="rfJ-1p-aWb"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="N9g-wE-6ct" secondAttribute="trailing" id="sQ0-zN-UvU"/>
+                            <constraint firstItem="Cz4-BJ-YxL" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" id="xcI-9N-2U9"/>
                         </constraints>
+                        <connections>
+                            <outlet property="authorizeButton" destination="UKk-Zh-Jun" id="OsR-P1-2Yy"/>
+                            <outlet property="backgroundImageView" destination="N9g-wE-6ct" id="WQe-Vr-Ifr"/>
+                            <outlet property="localWeatherLabel" destination="0sO-Bz-i8r" id="hB3-0n-f28"/>
+                        </connections>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="XE9-Pg-bt4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-709" y="-768"/>
+            <point key="canvasLocation" x="-709.16030534351137" y="-768.30985915492965"/>
         </scene>
     </scenes>
     <resources>
