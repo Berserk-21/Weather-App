@@ -250,7 +250,7 @@ final class WeatherViewModel {
         case 70...79:
             return UIImage(named: "snowfall")
         default:
-            return UIImage(named: "moon")
+            return UIImage(named: "earth")
         }
     }
     

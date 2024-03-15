@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y7w-M5-Wh1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -12,7 +12,7 @@
         <!--Navigation Controller-->
         <scene sceneID="fJM-8K-OM1">
             <objects>
-                <navigationController id="Y7w-M5-Wh1" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="WeatherNavigationController" id="Y7w-M5-Wh1" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="nkX-1h-a5y">
                         <rect key="frame" x="0.0" y="59" width="393" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -28,12 +28,12 @@
         <!--Weather View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="WeatherViewController" customModule="Weather_App" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WeatherViewController" id="BYZ-38-t0r" customClass="WeatherViewController" customModule="Weather_App" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC" customClass="HomeWeatherView" customModule="Weather_App" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="earth" translatesAutoresizingMaskIntoConstraints="NO" id="N0B-iP-3Oq">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="N0B-iP-3Oq">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                             </imageView>
                             <view alpha="0.10000000000000001" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O4q-mh-GQj">
@@ -177,9 +177,80 @@
             </objects>
             <point key="canvasLocation" x="159.54198473282443" y="-30.281690140845072"/>
         </scene>
+        <!--Onboarding View Controller-->
+        <scene sceneID="Bzr-5a-0bf">
+            <objects>
+                <viewController storyboardIdentifier="OnboardingViewController" id="bdE-Yi-rtI" customClass="OnboardingViewController" customModule="Weather_App" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ldt-gM-iKh" customClass="OnboardingView" customModule="Weather_App" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="N9g-wE-6ct">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="We need your authorization to fetch the weather of your current city !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0sO-Bz-i8r">
+                                <rect key="frame" x="16" y="154" width="361" height="40.666666666666657"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Cz4-BJ-YxL">
+                                <rect key="frame" x="0.0" y="664.66666666666663" width="393" height="187.33333333333337"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="iDZ-Vy-nMi">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="187"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UKk-Zh-Jun">
+                                            <rect key="frame" x="129" y="32" width="135" height="35"/>
+                                            <state key="normal" title="Button"/>
+                                            <buttonConfiguration key="configuration" style="filled" title="Fetch my city !"/>
+                                        </button>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Settings -&gt; Privacy -&gt; Locations Services -&gt; Weather App&quot;" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kWC-x0-yYa">
+                                            <rect key="frame" x="16" y="83" width="361" height="40.666666666666657"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="kWC-x0-yYa" firstAttribute="top" secondItem="UKk-Zh-Jun" secondAttribute="bottom" constant="16" id="LUt-nS-kgO"/>
+                                        <constraint firstItem="UKk-Zh-Jun" firstAttribute="top" secondItem="iDZ-Vy-nMi" secondAttribute="top" constant="32" id="NTX-W7-Pup"/>
+                                        <constraint firstItem="UKk-Zh-Jun" firstAttribute="centerX" secondItem="iDZ-Vy-nMi" secondAttribute="centerX" id="VAc-Np-sq1"/>
+                                        <constraint firstAttribute="trailing" secondItem="kWC-x0-yYa" secondAttribute="trailing" constant="16" id="b2f-XO-gvn"/>
+                                        <constraint firstAttribute="bottom" secondItem="kWC-x0-yYa" secondAttribute="bottom" constant="64" id="bnI-Ep-6bd"/>
+                                        <constraint firstItem="kWC-x0-yYa" firstAttribute="leading" secondItem="iDZ-Vy-nMi" secondAttribute="leading" constant="16" id="fl3-lO-sga"/>
+                                    </constraints>
+                                </view>
+                                <blurEffect style="regular"/>
+                            </visualEffectView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="5UC-oT-uCJ"/>
+                        <constraints>
+                            <constraint firstItem="0sO-Bz-i8r" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" constant="16" id="8Dm-HZ-YS9"/>
+                            <constraint firstItem="0sO-Bz-i8r" firstAttribute="top" secondItem="5UC-oT-uCJ" secondAttribute="top" constant="95" id="A4w-gT-0W3"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="0sO-Bz-i8r" secondAttribute="trailing" constant="16" id="X8U-QP-7gx"/>
+                            <constraint firstItem="N9g-wE-6ct" firstAttribute="top" secondItem="Ldt-gM-iKh" secondAttribute="top" id="aPi-sq-UWg"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="Cz4-BJ-YxL" secondAttribute="trailing" id="lAL-YN-og6"/>
+                            <constraint firstAttribute="bottom" secondItem="N9g-wE-6ct" secondAttribute="bottom" id="nLo-PL-zKq"/>
+                            <constraint firstItem="N9g-wE-6ct" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" id="ohd-k6-YdY"/>
+                            <constraint firstItem="Cz4-BJ-YxL" firstAttribute="bottom" secondItem="Ldt-gM-iKh" secondAttribute="bottom" id="rfJ-1p-aWb"/>
+                            <constraint firstItem="5UC-oT-uCJ" firstAttribute="trailing" secondItem="N9g-wE-6ct" secondAttribute="trailing" id="sQ0-zN-UvU"/>
+                            <constraint firstItem="Cz4-BJ-YxL" firstAttribute="leading" secondItem="5UC-oT-uCJ" secondAttribute="leading" id="xcI-9N-2U9"/>
+                        </constraints>
+                        <connections>
+                            <outlet property="authorizeButton" destination="UKk-Zh-Jun" id="OsR-P1-2Yy"/>
+                            <outlet property="backgroundImageView" destination="N9g-wE-6ct" id="WQe-Vr-Ifr"/>
+                            <outlet property="localWeatherLabel" destination="0sO-Bz-i8r" id="hB3-0n-f28"/>
+                            <outlet property="settingsLabel" destination="kWC-x0-yYa" id="pIe-2B-Dhd"/>
+                        </connections>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="XE9-Pg-bt4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-709.16030534351137" y="-768.30985915492965"/>
+        </scene>
     </scenes>
     <resources>
-        <image name="earth" width="3997" height="7106"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
