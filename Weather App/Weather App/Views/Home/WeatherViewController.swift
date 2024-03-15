@@ -10,10 +10,11 @@ import RxSwift
 import RxCocoa
 import RxRelay
 
-final class WeatherViewController: UIViewController {
+final class WeatherViewController: UIViewController, CoordinatorInterface {
 
     private var disposeBag = DisposeBag()
     private var viewModel: WeatherViewModel!
+    var coordinator: Coordinator?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,9 +63,7 @@ final class WeatherViewController: UIViewController {
     
     private func goToSettings() {
         
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
-        }
+        coordinator?.goToSettings()
     }
     
 }
