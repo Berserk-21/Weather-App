@@ -15,6 +15,7 @@ final class HomeWeatherView: UIView {
     let viewModel: WeatherViewModel
     private let disposeBag = DisposeBag()
     
+    @IBOutlet private weak var errorContentView: UIView!
     @IBOutlet private weak var contentView: UIView!
     @IBOutlet private weak var cityLabel: UILabel!
     @IBOutlet private weak var temperatureLabel: UILabel!
@@ -22,6 +23,7 @@ final class HomeWeatherView: UIView {
     @IBOutlet private weak var weatherCodeLabel: UILabel!
     @IBOutlet private weak var maxMinTemperatureLabel: UILabel!
     @IBOutlet private weak var backgroundImageView: UIImageView!
+    @IBOutlet private weak var initialBackgroundImageView: UIImageView!
     @IBOutlet private weak var filterView: UIView!
     @IBOutlet private weak var settingsButton: UIButton!
     @IBOutlet private weak var settingsLabel: UILabel!
@@ -86,7 +88,7 @@ final class HomeWeatherView: UIView {
         errorLabel.textColor = .white
         errorLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
         
-        backgroundImageView.image = UIImage(named: "earth")
+        initialBackgroundImageView.image = UIImage(named: "earth")
     }
     
     // MARK: - Binding Methods
@@ -96,7 +98,7 @@ final class HomeWeatherView: UIView {
         viewModel.observableWeatherData
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] weatherData in
-                self?.presentWeatherData(weatherData)
+//                self?.presentWeatherData(weatherData)
             })
             .disposed(by: disposeBag)
         
@@ -114,26 +116,88 @@ final class HomeWeatherView: UIView {
         
         switch state {
         case .loading:
-            activityIndicator.startAnimating()
-            filterView.alpha = 0.8
-            settingsVisualEffectView.isHidden = true
-            loadingLabel.isHidden = false
-            errorLabel.isHidden = true
-            contentView.isHidden = true
+            presentLoadingLayout()
+           
         case .error(let title, let message):
-            activityIndicator.stopAnimating()
-            filterView.alpha = 0.8
-            settingsVisualEffectView.isHidden = false
-            loadingLabel.isHidden = true
-            errorLabel.isHidden = false
-            contentView.isHidden = true
-            presentAlert(title: title, message: message)
-        case .completed:
-            activityIndicator.stopAnimating()
-            loadingLabel.isHidden = true
-            errorLabel.isHidden = true
-            contentView.isHidden = false
-            settingsVisualEffectView.isHidden = true
+            presentErrorLayout(title: title, message: message)
+            
+        case .completed(let data):
+            presentWeather(from: data)
+        }
+    }
+    
+    private func presentLoadingLayout() {
+        
+        filterView.alpha = 0.8
+        
+        errorContentView.alpha = 1.0
+        backgroundImageView.alpha = 0.0
+        
+        errorContentView.isHidden = false
+        initialBackgroundImageView.isHidden = false
+        backgroundImageView.isHidden = true
+
+        contentView.isHidden = true
+        settingsVisualEffectView.isHidden = true
+
+        activityIndicator.startAnimating()
+
+        loadingLabel.isHidden = false
+        errorLabel.isHidden = true
+    }
+    
+    private func presentErrorLayout(title: String, message: String) {
+        
+        filterView.alpha = 0.8
+        backgroundImageView.alpha = 0.0
+
+        errorContentView.isHidden = false
+        settingsVisualEffectView.isHidden = false
+        backgroundImageView.isHidden = true
+        
+        contentView.isHidden = true
+        
+        activityIndicator.stopAnimating()
+        
+        loadingLabel.isHidden = true
+        errorLabel.isHidden = false
+        
+        presentAlert(title: title, message: message)
+    }
+    
+    private func presentWeather(from data: WeatherDataModel, animate: Bool = true) {
+        
+        temperatureLabel.text = data.currentTemperature
+        maxMinTemperatureLabel.text = data.minMaxTemperature
+        cityLabel.text = data.city
+        weatherCodeLabel.text = data.weatherCode
+        backgroundImageView.image = data.backgroundImage
+        
+        contentView.isHidden = false
+        contentView.alpha = 0.0
+        errorContentView.isHidden = true
+        backgroundImageView.isHidden = false
+        
+        activityIndicator.stopAnimating()
+        
+        layoutIfNeeded()
+        
+        if animate {
+            
+            UIView.animate(withDuration: 0.8) {
+
+                self.filterView.alpha = 0.2
+                self.backgroundImageView.alpha = 1.0
+                self.errorContentView.alpha = 0.0
+                self.contentView.alpha = 1.0
+                                
+                self.layoutIfNeeded()
+            }
+        } else {
+            filterView.alpha = 0.2
+            backgroundImageView.alpha = 1.0
+            contentView.alpha = 1.0
+            errorContentView.alpha = 0.0
         }
     }
     
@@ -141,29 +205,6 @@ final class HomeWeatherView: UIView {
         
         alertTexts
             .onNext((title, message))
-    }
-    
-    private func presentWeatherData(_ weatherData: WeatherDataModel, animate: Bool = true) {
-        
-        if animate {
-            UIView.animate(withDuration: 0.8) {
-                self.temperatureLabel.text = weatherData.currentTemperature
-                self.maxMinTemperatureLabel.text = weatherData.minMaxTemperature
-                self.cityLabel.text = weatherData.city
-                self.weatherCodeLabel.text = weatherData.weatherCode
-                self.backgroundImageView.image = weatherData.backgroundImage
-                self.filterView.alpha = 0.2
-            }
-        } else {
-            temperatureLabel.text = weatherData.currentTemperature
-            maxMinTemperatureLabel.text = weatherData.minMaxTemperature
-            cityLabel.text = weatherData.city
-            weatherCodeLabel.text = weatherData.weatherCode
-            backgroundImageView.image = weatherData.backgroundImage
-            filterView.alpha = 0.2
-        }
-        
-        layoutIfNeeded()
     }
     
     // MARK: - Actions
