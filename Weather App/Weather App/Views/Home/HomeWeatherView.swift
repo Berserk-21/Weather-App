@@ -28,6 +28,7 @@ final class HomeWeatherView: UIView {
     @IBOutlet private weak var settingsVisualEffectView: UIVisualEffectView!
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet private weak var loadingLabel: UILabel!
+    @IBOutlet private weak var errorLabel: UILabel!
     
     var alertTexts: PublishSubject<(String, String)> = PublishSubject()
     var goToSettings: PublishSubject<Bool> = PublishSubject()
@@ -80,6 +81,10 @@ final class HomeWeatherView: UIView {
         
         loadingLabel.text = Constants.Views.HomeView.loadingLabelText
         loadingLabel.textColor = .white
+        
+        errorLabel.text = Constants.Geolocation.Error.title
+        errorLabel.textColor = .white
+        errorLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
     }
     
     // MARK: - Binding Methods
@@ -111,17 +116,20 @@ final class HomeWeatherView: UIView {
             filterView.alpha = 0.8
             settingsVisualEffectView.isHidden = true
             loadingLabel.isHidden = false
+            errorLabel.isHidden = true
             contentView.isHidden = true
         case .error(let title, let message):
             activityIndicator.stopAnimating()
             filterView.alpha = 0.8
             settingsVisualEffectView.isHidden = false
             loadingLabel.isHidden = true
+            errorLabel.isHidden = false
             contentView.isHidden = true
             presentAlert(title: title, message: message)
         case .completed:
             activityIndicator.stopAnimating()
             loadingLabel.isHidden = true
+            errorLabel.isHidden = true
             contentView.isHidden = false
             settingsVisualEffectView.isHidden = true
         }
