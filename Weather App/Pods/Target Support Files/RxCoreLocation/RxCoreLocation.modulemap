@@ -1,0 +1,6 @@
+module RxCoreLocation {
+  umbrella header "RxCoreLocation-umbrella.h"
+
+  export *
+  module * { export * }
+}
