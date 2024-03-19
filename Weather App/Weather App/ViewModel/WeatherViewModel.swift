@@ -31,18 +31,18 @@ final class WeatherViewModel {
     private var weatherForecast: PublishSubject<OpenWeatherModel> = PublishSubject()
     private var currentCity: PublishSubject<String> = PublishSubject()
     
-    lazy var observableWeatherData: Observable<(WeatherDataModel)> = {
+    lazy var observableWeatherData: Observable<WeatherDataModel?> = {
         return Observable.zip(weatherForecast, currentCity)
             .map { [weak self] weatherData in
                 
-                if let data = self?.getWeatherData(from: weatherData) {
-                    self?.fetchingState.onNext(.completed(data))
-                    return data
-                } else {
+                guard let data = self?.getWeatherData(from: weatherData) else {
                     self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage))
-                    // Later return last fetched weather
-                    return WeatherDataModel(city: "Dummy", currentTemperature: "Dummy", minMaxTemperature: "Dummy", weatherCode: "Dummy", backgroundImage: UIImage(named: "moon")!)
+                    return nil
                 }
+
+                self?.fetchingState.onNext(.completed(data))
+                
+                return nil
             }
             .asObservable()
     }()
