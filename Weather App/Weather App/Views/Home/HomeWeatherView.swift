@@ -85,6 +85,8 @@ final class HomeWeatherView: UIView {
         errorLabel.text = Constants.Geolocation.Error.title
         errorLabel.textColor = .white
         errorLabel.font = UIFont.systemFont(ofSize: 24.0, weight: .medium)
+        
+        backgroundImageView.image = UIImage(named: "earth")
     }
     
     // MARK: - Binding Methods
