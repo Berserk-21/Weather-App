@@ -8,7 +8,7 @@
 import UIKit
 import RxSwift
 
-final class HomeWeatherView: UIView {
+final class WeatherView: UIView {
     
     // MARK: - Properties
     
