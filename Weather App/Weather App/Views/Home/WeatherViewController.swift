@@ -26,7 +26,7 @@ final class WeatherViewController: UIViewController, CoordinatorInterface {
     
     private func bindings() {
         
-        if let homeView = view as? HomeWeatherView {
+        if let homeView = view as? WeatherView {
             self.viewModel = homeView.viewModel
             
             homeView.alertTexts

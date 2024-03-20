@@ -40,6 +40,7 @@ enum Constants {
         enum Error {
             static let didFail = "Fetching weather failed"
             static let defaultMessage = "Something was wrong preparing the weather data"
+            static let timeout = "Please check your internet connexion and try again !"
         }
     }
     

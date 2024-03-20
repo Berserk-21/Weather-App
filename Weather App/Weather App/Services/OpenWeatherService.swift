@@ -17,13 +17,18 @@ enum OpenWeatherServiceError: Error {
 
 final class OpenWeatherService {
     
+    private var currentTask: URLSessionTask?
+    
     /// Use this method to fetch weather data from Open Weather API.
     func fetchWeatherForecast(with urlString: String) -> Observable<OpenWeatherModel> {
     
         guard let url = URL(string: urlString) else { return Observable.error(NSError(domain: "", code: -1))}
         
+        currentTask?.cancel()
+        
         return Observable.create { observer in
-            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            self.currentTask = URLSession.shared.dataTask(with: url) { data, response, error in
+                
                 if let error = error {
                     observer.onError(OpenWeatherServiceError.transportError(error))
                     return
@@ -56,11 +61,12 @@ final class OpenWeatherService {
                 observer.onCompleted()
             }
             
-            task.resume()
+            self.currentTask?.resume()
             
             return Disposables.create {
-                task.cancel()
+                self.currentTask?.cancel()
             }
         }
+        .timeout(RxTimeInterval.seconds(10), scheduler: MainScheduler.instance)
     }
 }
