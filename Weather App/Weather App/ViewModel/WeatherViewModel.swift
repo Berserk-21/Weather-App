@@ -14,8 +14,14 @@ import RxCoreLocation
 
 enum FetchingState {
     case loading
-    case error(title: String, message: String)
+    case error(ErrorState)
     case completed(WeatherDataModel)
+}
+
+enum ErrorState {
+    case network(title: String, message: String)
+    case geolocalization(title: String, message: String)
+    case dataModeling(title: String, message: String)
 }
 
 final class WeatherViewModel {
@@ -36,7 +42,7 @@ final class WeatherViewModel {
             .map { [weak self] weatherData in
                 
                 guard let data = self?.getWeatherData(from: weatherData) else {
-                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage))
+                    self?.fetchingState.onNext(.error(ErrorState.dataModeling(title: Constants.FetchingWeather.Error.didFail, message: Constants.FetchingWeather.Error.defaultMessage)))
                     return nil
                 }
 
@@ -78,7 +84,7 @@ final class WeatherViewModel {
                 if let location = event.element?.locations.first {
                     self?.fetchWeatherData(for: location)
                 } else {
-                    self?.fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: Constants.Geolocation.Error.locationUnknown))
+                    self?.fetchingState.onNext(.error(ErrorState.geolocalization(title: Constants.FetchingWeather.Error.didFail, message: Constants.Geolocation.Error.locationUnknown)))
                 }
             }
             .disposed(by: disposeBag)
@@ -127,9 +133,9 @@ final class WeatherViewModel {
                 case .notDetermined:
                     self?.locationManager.requestWhenInUseAuthorization()
                 case .denied:
-                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
+                    self?.fetchingState.onNext(.error(ErrorState.geolocalization(title: Constants.Geolocation.Error.title, message: Constants.Views.HomeView.settingsLabelText)))
                 case .restricted:
-                    self?.fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.denied))
+                    self?.fetchingState.onNext(.error(ErrorState.geolocalization(title: Constants.Geolocation.Error.title, message: Constants.Geolocation.Error.restricted)))
                 @unknown default:
                     print("Unknown location authorization status")
                 }
@@ -150,28 +156,35 @@ final class WeatherViewModel {
     
     private func didFailFetchingWeather(with error: Error) {
         
-        guard let weatherServiceError = error as? OpenWeatherServiceError else {
-            fatalError("the error must be of type OpenWeatherServiceError")
-        }
-        
         let errorMessage: String
-        
-        switch weatherServiceError {
-        case .dataUnavailable:
-            errorMessage = "Data unavailable"
-            print("There was an error fetching Weather data: dataUnavailable")
-        case .responseUnavailable:
-            errorMessage = "Response unavailable"
-            print("There was an error fetching Weather data: responseUnavailable")
-        case .serverSideError(let statusCode):
-            errorMessage = statusCode.description
-            print("There was an error fetching Weather data: \(statusCode.description)")
-        case .transportError(let error):
-            errorMessage = error.localizedDescription
-            print("There was an error fetching Weather data: \(error.localizedDescription)")
+
+        if let weatherServiceError = error as? OpenWeatherServiceError {
+            switch weatherServiceError {
+            case .dataUnavailable:
+                errorMessage = "Data unavailable"
+                print("There was an error fetching Weather data: dataUnavailable")
+            case .responseUnavailable:
+                errorMessage = "Response unavailable"
+                print("There was an error fetching Weather data: responseUnavailable")
+            case .serverSideError(let statusCode):
+                errorMessage = statusCode.description
+                print("There was an error fetching Weather data: \(statusCode.description)")
+            case .transportError(let error):
+                errorMessage = error.localizedDescription
+                print("There was an error fetching Weather data: \(error.localizedDescription)")
+            }
+        } else if let rxError = error as? RxError {
+            switch rxError {
+            case .timeout:
+                errorMessage = Constants.FetchingWeather.Error.timeout
+            default:
+                errorMessage = Constants.FetchingWeather.Error.defaultMessage
+            }
+        } else {
+            errorMessage = Constants.FetchingWeather.Error.defaultMessage
         }
         
-        fetchingState.onNext(.error(title: Constants.FetchingWeather.Error.didFail, message: errorMessage))
+        fetchingState.onNext(.error(ErrorState.network(title: Constants.FetchingWeather.Error.didFail, message: errorMessage)))
     }
     
     // MARK: - Helper Methods
@@ -184,14 +197,14 @@ final class WeatherViewModel {
         case .locationUnknown:
             errorMessage = Constants.Geolocation.Error.locationUnknown
         case .denied:
-            errorMessage = Constants.Geolocation.Error.denied
+            errorMessage = Constants.Views.HomeView.settingsLabelText
         case .network:
             errorMessage = Constants.Geolocation.Error.network
         default:
             errorMessage = Constants.Geolocation.Error.defaultMessage
         }
         
-        fetchingState.onNext(.error(title: Constants.Geolocation.Error.title, message: errorMessage))
+        fetchingState.onNext(.error(ErrorState.geolocalization(title: Constants.Geolocation.Error.title, message: errorMessage)))
     }
     
     private func getWeatherData(from weatherData: (OpenWeatherModel, String)) -> WeatherDataModel? {

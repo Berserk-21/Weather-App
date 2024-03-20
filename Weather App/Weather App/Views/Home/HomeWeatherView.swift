@@ -118,8 +118,9 @@ final class HomeWeatherView: UIView {
         case .loading:
             presentLoadingLayout()
            
-        case .error(let title, let message):
-            presentErrorLayout(title: title, message: message)
+        case .error(let state):
+            
+            presentErrorLayout(for: state)
             
         case .completed(let data):
             presentWeather(from: data)
@@ -146,7 +147,7 @@ final class HomeWeatherView: UIView {
         errorLabel.isHidden = true
     }
     
-    private func presentErrorLayout(title: String, message: String) {
+    private func presentErrorLayout(for state: ErrorState) {
         
         filterView.alpha = 0.8
         backgroundImageView.alpha = 0.0
@@ -162,7 +163,35 @@ final class HomeWeatherView: UIView {
         loadingLabel.isHidden = true
         errorLabel.isHidden = false
         
-        presentAlert(title: title, message: message)
+        let alertTitle: String
+        let alertMessage: String
+        
+        switch state {
+        case .dataModeling(let title, let message):
+            alertTitle = title
+            alertMessage = message
+            
+            errorLabel.text = message
+            
+            settingsVisualEffectView.isHidden = true
+            
+        case.geolocalization(let title, let message):
+            alertTitle = title
+            alertMessage = message
+            
+            errorLabel.text = title
+            settingsLabel.text = message
+            
+        case .network(let title, let message):
+            alertTitle = title
+            alertMessage = message
+
+            errorLabel.text = title
+            
+            settingsVisualEffectView.isHidden = true
+        }
+        
+        presentAlert(title: alertTitle, message: alertMessage)
     }
     
     private func presentWeather(from data: WeatherDataModel, animate: Bool = true) {
