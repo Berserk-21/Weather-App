@@ -37,6 +37,9 @@ final class WeatherViewModel {
     private var weatherForecast: PublishSubject<OpenWeatherModel> = PublishSubject()
     private var currentCity: PublishSubject<String> = PublishSubject()
     
+    // For some reason we can't trust the CoreLocation requestLocation method to fetch only one location.
+    private var didRequestGeolocalization: Bool = false
+    
     lazy var observableWeatherData: Observable<WeatherDataModel?> = {
         return Observable.zip(weatherForecast, currentCity)
             .map { [weak self] weatherData in
@@ -71,8 +74,14 @@ final class WeatherViewModel {
     
     func bindActions() {
         
-        localizeUserAction.subscribe(onNext: { [weak self] in
+        localizeUserAction
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in
+            
+            guard let didRequestGeolocalization = self?.didRequestGeolocalization, didRequestGeolocalization == false else { return }
+            
             self?.fetchingState.onNext(.loading)
+            self?.didRequestGeolocalization = true
             self?.locationManager.requestLocation()
         })
         .disposed(by: disposeBag)
@@ -80,12 +89,17 @@ final class WeatherViewModel {
         locationManager.rx.didUpdateLocations
             .throttle(.seconds(10), scheduler: MainScheduler.instance)
             .subscribe { [weak self] event in
+                
+                guard let didRequestGeolocalization = self?.didRequestGeolocalization, didRequestGeolocalization == true else { return }
+                
                 self?.locationManager.stopUpdatingLocation()
                 if let location = event.element?.locations.first {
                     self?.fetchWeatherData(for: location)
                 } else {
                     self?.fetchingState.onNext(.error(ErrorState.geolocalization(title: Constants.FetchingWeather.Error.didFail, message: Constants.Geolocation.Error.locationUnknown)))
                 }
+                
+                self?.didRequestGeolocalization = false
             }
             .disposed(by: disposeBag)
         
@@ -96,6 +110,7 @@ final class WeatherViewModel {
                 } else {
                     fatalError("the error must be of type CLError")
                 }
+                self?.didRequestGeolocalization = false
             })
             .disposed(by: disposeBag)
     }
@@ -129,6 +144,7 @@ final class WeatherViewModel {
             .subscribe(onNext: { [weak self] event in
                 switch event.status {
                 case .authorizedAlways, .authorizedWhenInUse:
+                    self?.didRequestGeolocalization = true
                     self?.locationManager.requestLocation()
                 case .notDetermined:
                     self?.locationManager.requestWhenInUseAuthorization()
