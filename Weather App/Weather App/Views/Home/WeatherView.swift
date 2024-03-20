@@ -130,8 +130,6 @@ final class WeatherView: UIView {
     private func presentLoadingLayout() {
         
         filterView.alpha = 0.8
-        
-        errorContentView.alpha = 1.0
         backgroundImageView.alpha = 0.0
         
         errorContentView.isHidden = false
@@ -182,6 +180,8 @@ final class WeatherView: UIView {
             errorLabel.text = title
             settingsLabel.text = message
             
+            settingsVisualEffectView.isHidden = false
+            
         case .network(let title, let message):
             alertTitle = title
             alertMessage = message
@@ -217,7 +217,6 @@ final class WeatherView: UIView {
 
                 self.filterView.alpha = 0.2
                 self.backgroundImageView.alpha = 1.0
-                self.errorContentView.alpha = 0.0
                 self.contentView.alpha = 1.0
                                 
                 self.layoutIfNeeded()
@@ -226,7 +225,6 @@ final class WeatherView: UIView {
             filterView.alpha = 0.2
             backgroundImageView.alpha = 1.0
             contentView.alpha = 1.0
-            errorContentView.alpha = 0.0
         }
     }
     
