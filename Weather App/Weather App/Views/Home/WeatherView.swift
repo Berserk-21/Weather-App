@@ -1,5 +1,5 @@
 //
-//  HomeWeatherView.swift
+//  WeatherView.swift
 //  Weather App
 //
 //  Created by Berserk on 05/03/2024.
